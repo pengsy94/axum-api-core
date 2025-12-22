@@ -28,23 +28,19 @@ fn add_web_routes(mut router: Router) -> Router {
 
     if config.debug {
         //  测试模块
-        // router = router.nest("/test", test_api());
+        router = router.nest("/test", Router::new().route("/ws", get(websocket)));
     }
 
-    router = router
-        .route("/", get(index))
-        .route("/websocket", get(websocket))
-        .nest(
-            "/api",
-            Router::new().route("/", get(|| async { "Hello, Api!" })),
-        );
+    router = router.route("/", get(index)).nest(
+        "/api",
+        Router::new().route("/", get(|| async { "Hello, Api!" })),
+    );
 
     router
 }
 
 async fn index() -> impl IntoResponse {
-    use std::collections::HashMap;
-    let data = HashMap::from([
+    let data = std::collections::HashMap::from([
         ("title", "首页 - Axum - Blade 模板示例"),
         ("welcome_message", "欢迎来到 Axum - Blade 模板世界"),
     ]);
@@ -56,7 +52,14 @@ async fn index() -> impl IntoResponse {
 }
 
 async fn websocket() -> impl IntoResponse {
-    match engine::blade::render_view("websocket/index") {
+    let config = server_config();
+
+    let ws_url = format!("ws://127.0.0.1:{}{}", config.port, config.ws_path);
+    let data = std::collections::HashMap::from([
+        ("ws_url", ws_url.as_str())
+    ]);
+
+    match engine::blade::render_map("websocket/index", data) {
         Ok(html) => Html(html).into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e).into_response(),
     }
