@@ -44,9 +44,6 @@
 - 广播信息
 
 ```json
-{
-  "type": "broadcast",
-  "message": "大家好"
-}
+{"type": "broadcast", "message": "大家好"}
 ```
 
