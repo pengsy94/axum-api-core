@@ -79,6 +79,7 @@ dependencies = [
  "core",
  "database",
  "futures-util",
+ "middleware-fn",
  "serde",
  "serde_json",
  "tokio",
@@ -460,7 +461,6 @@ name = "common"
 version = "0.1.0"
 dependencies = [
  "dotenvy",
- "num_cpus",
  "thiserror",
 ]
 
@@ -505,6 +505,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "common",
+ "num_cpus",
  "once_cell",
  "serde",
  "tera",
@@ -1592,6 +1593,17 @@ name = "memchr"
 version = "2.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f52b00d39961fc5b2736ea853c9cc86238e165017a493d1d5c8eac6bdc4cc273"
+
+[[package]]
+name = "middleware-fn"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "http",
+ "serde_json",
+ "tokio",
+ "tracing",
+]
 
 [[package]]
 name = "mime"

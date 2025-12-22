@@ -1,5 +1,12 @@
 [workspace]
-members = ["api", "bin", "common", "core", "database"]
+members = [
+    "api",
+    "bin",
+    "common",
+    "core",
+    "database",
+    "middleware-fn"
+]
 resolver = "3"
 
 [workspace.package]
@@ -31,6 +38,7 @@ uuid = "1.19.0"
 tera = "1.20.1"
 once_cell = "1.21.3"
 sea-orm = "2.0.0-rc.22"
+http = "1.4.0"
 
 [profile.release]
 opt-level = 2        # 从 3 降到 2（平衡性能和编译兼容性）

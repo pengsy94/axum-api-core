@@ -1,3 +1,4 @@
+use chrono::Local;
 use common::config::server_config;
 use std::{env, process};
 
@@ -15,16 +16,20 @@ pub fn show() {
     let system_name = std::env::consts::OS;
 
     let socket_url = format!("{}:{}{}", config.host, config.port, config.ws_path);
-    let start_time = chrono::Local::now().format("%Y-%m-%d %H:%M:%S");
 
-    println!("{:>2}: {}", "系统架构", env::consts::ARCH);
-    println!("{:>2}: {}", "操作系统", system_name);
-    println!("{:>2}: {}", "服务进程", process::id());
-    println!("{:>6}: http://{}:{}", "API服务", config.host, config.port);
+    println!("{:>5}: {}", "系统架构", env::consts::ARCH);
+    println!("{:>5}: {}", "操作系统", system_name);
+    println!("{:>2}: {}", "CPU核心数", num_cpus::get());
+    println!("{:>5}: {}", "服务进程", process::id());
+    println!("{:>7}: http://{}:{}", "API服务", config.host, config.port);
     if config.ws_open {
-        println!("{:>6}: ws://{}", "WS服务", socket_url);
+        println!("{:>7}: ws://{}", "WS服务", socket_url);
     }
-    println!("{:>2}: {}", "启动时间", start_time);
+    println!(
+        "{:>5}: {}",
+        "启动时间",
+        Local::now().format("%Y-%m-%d %H:%M:%S")
+    );
 
     println!()
 }

@@ -1,12 +1,13 @@
 use crate::routes;
 
-use axum::Router;
 use axum::http::StatusCode;
 use axum::response::{Html, IntoResponse};
 use axum::routing::{get, get_service, post};
+use axum::{Router, middleware};
 use common::config::{RESOURCE_DIR, WEB_STATIC_DIR, server_config};
 use core::engine;
 use database::repository::sys_user;
+use middleware_fn::request::{logging_middleware, rate_limiter};
 use tower_http::services::ServeDir;
 
 pub fn build_router() -> Router {
@@ -17,7 +18,9 @@ pub fn build_router() -> Router {
 
     // 静态资源
     let static_dir = format!("{}/{}", RESOURCE_DIR, WEB_STATIC_DIR);
-    router.nest_service("/static", get_service(ServeDir::new(static_dir)))
+    router
+        .nest_service("/static", get_service(ServeDir::new(static_dir)))
+        .layer(middleware::from_fn(rate_limiter)) // 整体限流
 }
 
 fn add_web_routes(mut router: Router) -> Router {
@@ -45,7 +48,9 @@ fn add_web_routes(mut router: Router) -> Router {
                 // post json提交参数
                 .route("/post-json", post(routes::case::args::sys_query_json))
                 // post form提交参数
-                .route("/post-form", post(routes::case::args::sys_query_form)),
+                .route("/post-form", post(routes::case::args::sys_query_form))
+                // 整个组添加 中间件案例
+                .layer(middleware::from_fn(logging_middleware)),
         );
     }
 

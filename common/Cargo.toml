@@ -6,6 +6,5 @@ version.workspace = true
 
 [dependencies]
 dotenvy = { workspace = true }
-num_cpus = { workspace = true }
 thiserror = { workspace = true }
 
