@@ -6,22 +6,14 @@ use std::net::IpAddr;
 #[derive(Debug, Clone)]
 pub struct ServerConfig {
     pub debug: bool,
-
     pub host: IpAddr,
     pub port: u16,
-    pub workers: usize,
-
-    pub api_prefix: String,
-
     pub content_gzip: bool,
-
     /// 是否开启定时任务
     pub cron: bool,
-
     /// 是否开启ws
     pub ws_open: bool,
     pub ws_path: String,
-
     /// `log_level` 日志输出等级 TRACE DEBUG INFO  WARN ERROR
     pub log_level: String,
     /// `dir` 日志输出文件夹
@@ -50,20 +42,10 @@ impl ServerConfig {
             .parse::<u16>()
             .map_err(|e| ConfigError::InvalidValue("SERVER_PORT".to_string(), e.to_string()))?;
 
-        let workers = env::var("SERVER_WORKERS")
-            .unwrap_or_else(|_| num_cpus::get().to_string())
-            .parse::<usize>()
-            .map_err(|e| ConfigError::InvalidValue("SERVER_WORKERS".to_string(), e.to_string()))?;
-
         let log_level = env::var("LOG_LEVEL")
             .unwrap_or_else(|_| "DEBUG".to_string())
             .parse::<String>()
             .map_err(|_| ConfigError::MissingEnvVar("LOG_LEVEL".to_string()))?;
-
-        let api_prefix = env::var("SERVER_API_PREFIX")
-            .unwrap_or_else(|_| "/api".to_string())
-            .parse::<String>()
-            .map_err(|_| ConfigError::MissingEnvVar("SERVER_API_PREFIX".to_string()))?;
 
         let content_gzip = env::var("SERVER_CONTENT_GZIP")
             .unwrap_or_else(|_| "true".to_string())
@@ -102,19 +84,12 @@ impl ServerConfig {
 
         Ok(Self {
             debug,
-
             host,
             port,
-            workers,
-
-            api_prefix,
             content_gzip,
-
             cron,
-
             ws_open,
             ws_path,
-
             log_level,
             log_dir,
             log_file,
