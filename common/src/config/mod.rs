@@ -8,10 +8,6 @@ use crate::config::database_config::DatabaseConfig;
 use crate::config::server_config::ServerConfig;
 use crate::error::ConfigError;
 
-pub const RESOURCE_DIR: &str = "resources";
-pub const WEB_STATIC_DIR: &str = "/_static";
-pub const WEB_VIEW_DIR: &str = "/_view";
-
 /// 应用配置
 #[derive(Debug, Clone)]
 pub struct AppConfig {

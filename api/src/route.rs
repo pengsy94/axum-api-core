@@ -1,14 +1,12 @@
 use crate::routes;
 
-use axum::http::StatusCode;
-use axum::response::{Html, IntoResponse};
-use axum::routing::{get, get_service, post};
-use axum::{Router, middleware};
-use common::config::{RESOURCE_DIR, WEB_STATIC_DIR, server_config};
-use core::engine;
-use database::repository::sys_user;
+use axum::response::Json;
+use axum::routing::{get, post};
+use axum::{middleware, Router};
+use common::config::{server_config};
+use database::entities::sys_user;
+use database::repository::sys_user_repository;
 use middleware_fn::request::{logging_middleware, rate_limiter};
-use tower_http::services::ServeDir;
 
 pub fn build_router() -> Router {
     let mut router = Router::new();
@@ -16,17 +14,14 @@ pub fn build_router() -> Router {
     // 添加 Web 路由
     router = add_web_routes(router);
 
-    // 静态资源
-    let static_dir = format!("{}/{}", RESOURCE_DIR, WEB_STATIC_DIR);
-    router
-        .nest_service("/static", get_service(ServeDir::new(static_dir)))
-        .layer(middleware::from_fn(rate_limiter)) // 整体限流
+    router.layer(middleware::from_fn(rate_limiter)) // 整体限流
 }
 
 fn add_web_routes(mut router: Router) -> Router {
     let config = server_config();
 
     if config.ws_open {
+        // ws服务和测试页面
         router = router.nest(&config.ws_path, routes::websocket::set_websocket_api());
     }
 
@@ -35,8 +30,6 @@ fn add_web_routes(mut router: Router) -> Router {
         router = router.nest(
             "/test",
             Router::new()
-                // websocket 页面
-                .route("/ws", get(websocket))
                 // 获取参数 /{id}
                 .route("/{id}", get(routes::case::args::sys_path_test))
                 .route("/{name}/{age}", get(routes::case::args::sys_path_2_test))
@@ -62,23 +55,8 @@ fn add_web_routes(mut router: Router) -> Router {
     router
 }
 
-async fn index() -> impl IntoResponse {
-    let sys_user_data = sys_user::get_by_id("2").await.unwrap();
+async fn index() -> Json<sys_user::Model> {
+    let sys_user_data = sys_user_repository::get_by_id("2").await.unwrap();
 
-    match engine::blade::render_with_struct("index", &sys_user_data) {
-        Ok(html) => Html(html).into_response(),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e).into_response(),
-    }
-}
-
-async fn websocket() -> impl IntoResponse {
-    let config = server_config();
-
-    let ws_url = format!("ws://127.0.0.1:{}{}", config.port, config.ws_path);
-    let data = std::collections::HashMap::from([("ws_url", ws_url.as_str())]);
-
-    match engine::blade::render_map("websocket/index", data) {
-        Ok(html) => Html(html).into_response(),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e).into_response(),
-    }
+    Json(sys_user_data)
 }

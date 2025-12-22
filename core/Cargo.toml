@@ -13,6 +13,6 @@ chrono = { workspace = true }
 once_cell = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
 tokio = { workspace = true, features = ["full", "signal"] }
-tracing = { workspace = true }
 tokio-cron-scheduler = { workspace = true }
+tracing = { workspace = true }
 num_cpus = { workspace = true }
