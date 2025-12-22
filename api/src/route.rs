@@ -6,7 +6,7 @@ use axum::response::{Html, IntoResponse};
 use axum::routing::{get, get_service, post};
 use common::config::{RESOURCE_DIR, WEB_STATIC_DIR, server_config};
 use core::engine;
-use orm::repository::sys_user;
+use database::repository::sys_user;
 use tower_http::services::ServeDir;
 
 pub fn build_router() -> Router {

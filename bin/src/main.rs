@@ -10,7 +10,7 @@ async fn main() -> anyhow::Result<()> {
     let _logger = logger::Logger::init();
 
     tokio::select! {
-        server_result = axum_server::bind(listener).serve(app.into_make_service()) => {
+        server_result =  axum::serve(listener, app) => {
             if let Err(e) = server_result {
                 eprintln!("\n❌ 服务器异常错误: {}", e);
                 std::process::exit(1);

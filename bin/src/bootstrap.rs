@@ -5,18 +5,18 @@ use axum::{
 };
 use common::config::{AppConfig, server_config};
 use core::tasks::manager::SchedulerManager;
-use orm::DatabaseManager;
-use std::net::SocketAddr;
+use database::DatabaseManager;
+use tokio::net::TcpListener;
 use tower_http::{
     compression::{CompressionLayer, DefaultPredicate, Predicate, predicate::NotForContentType},
     cors::{Any, CorsLayer},
 };
 
-pub async fn make() -> anyhow::Result<(Router, SocketAddr, SchedulerManager)> {
+pub async fn make() -> anyhow::Result<(Router, TcpListener, SchedulerManager)> {
     // 初始化配置（只调用一次）
     AppConfig::init()?;
     // 构建应用
-    let (app, listener) = build_router().await?;
+    let (app, listener) = build_application().await?;
     // 初始化数据库信息
     DatabaseManager::init().await?;
 
@@ -35,7 +35,7 @@ async fn handle_404() -> (StatusCode, &'static str) {
     (StatusCode::NOT_FOUND, "Not found")
 }
 
-async fn build_router() -> anyhow::Result<(Router, SocketAddr)> {
+async fn build_application() -> anyhow::Result<(Router, TcpListener)> {
     let config = server_config();
 
     let app = route::build_router().fallback(handle_404);
@@ -51,7 +51,8 @@ async fn build_router() -> anyhow::Result<(Router, SocketAddr)> {
     // 添加cors跨越
     let app = app.layer(setup_cors());
 
-    let listener: SocketAddr = format!("{}:{}", config.host, config.port).parse()?;
+    let addr = format!("{}:{}", config.host, config.port);
+    let listener = TcpListener::bind(addr).await?;
     Ok((app, listener))
 }
 
