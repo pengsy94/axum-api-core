@@ -1,0 +1,22 @@
+[package]
+name = "bin"
+default-run = "bin"
+edition.workspace = true
+publish.workspace = true
+version.workspace = true
+
+[dependencies]
+api = { path = "../api" }
+common = { path = "../common" }
+core = { path = "../core" }
+
+axum = { workspace = true }
+axum-server = { workspace = true, features = ["tls-rustls"] }
+anyhow = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "parking_lot", "signal"] }
+tower-http = { workspace = true, features = ["cors", "fs", "compression-gzip"] }  #compression-gzip
+time = { workspace = true }
+tracing = { workspace = true }
+tracing-appender = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter", "local-time"] }
+chrono = { workspace = true }
