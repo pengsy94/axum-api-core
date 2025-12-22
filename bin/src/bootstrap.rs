@@ -4,6 +4,7 @@ use axum::{
     http::{Method, StatusCode},
 };
 use common::config::{AppConfig, server_config};
+use core::tasks::manager::SchedulerManager;
 use orm::DatabaseManager;
 use std::net::SocketAddr;
 use tower_http::{
@@ -11,7 +12,7 @@ use tower_http::{
     cors::{Any, CorsLayer},
 };
 
-pub async fn make() -> anyhow::Result<(Router, SocketAddr)> {
+pub async fn make() -> anyhow::Result<(Router, SocketAddr, SchedulerManager)> {
     // 初始化配置（只调用一次）
     AppConfig::init()?;
     // 构建应用
@@ -22,7 +23,12 @@ pub async fn make() -> anyhow::Result<(Router, SocketAddr)> {
     // 打印系统信息
     core::system::show();
 
-    Ok((app, listener))
+    // 创建调度器管理器
+    let scheduler_manager = SchedulerManager::new();
+    // 启动定时任务
+    scheduler_manager.start().await.unwrap();
+
+    Ok((app, listener, scheduler_manager))
 }
 
 async fn handle_404() -> (StatusCode, &'static str) {

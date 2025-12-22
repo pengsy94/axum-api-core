@@ -4,7 +4,7 @@ mod logger;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // 服务应用初始化
-    let (app, listener) = bootstrap::make().await?;
+    let (app, listener, scheduler_manager) = bootstrap::make().await?;
 
     // 日志服务初始化(接收)
     let _logger = logger::Logger::init();
@@ -20,8 +20,8 @@ async fn main() -> anyhow::Result<()> {
             println!("\n🕞 接收到 Ctrl+C 信号，正在优雅关闭...");
 
             // 调用调度器的关闭方法
-            // let shutdown_future = scheduler_manager.shutdown_future();
-            // shutdown_future.await;
+            let shutdown_future = scheduler_manager.shutdown_future();
+            shutdown_future.await;
         }
     }
 

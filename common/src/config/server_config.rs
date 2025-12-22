@@ -15,6 +15,9 @@ pub struct ServerConfig {
 
     pub content_gzip: bool,
 
+    /// 是否开启定时任务
+    pub cron: bool,
+
     /// 是否开启ws
     pub ws_open: bool,
     pub ws_path: String,
@@ -67,6 +70,11 @@ impl ServerConfig {
             .parse::<bool>()
             .map_err(|e| ConfigError::InvalidValue("SERVER_CONTENT_GZIP".to_string(), e.to_string()))?;
 
+        let cron = env::var("SERVER_CRON")
+            .unwrap_or_else(|_| "false".to_string())
+            .parse::<bool>()
+            .map_err(|e| ConfigError::InvalidValue("SERVER_CRON".to_string(), e.to_string()))?;
+
         let ws_open = env::var("SERVER_WS_OPEN")
             .unwrap_or_else(|_| "false".to_string())
             .parse::<bool>()
@@ -101,6 +109,8 @@ impl ServerConfig {
 
             api_prefix,
             content_gzip,
+
+            cron,
 
             ws_open,
             ws_path,
