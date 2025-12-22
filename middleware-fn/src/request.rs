@@ -3,7 +3,7 @@ use axum::{
     extract::{OriginalUri, Request},
     http::StatusCode,
     middleware::Next,
-    response::{IntoResponse, Response},
+    response::Response,
 };
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::Duration;
