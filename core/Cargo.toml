@@ -7,10 +7,7 @@ version.workspace = true
 [dependencies]
 common = { path = "../common" }
 
-serde = { workspace = true, features = ["derive"] }
-tera = { workspace = true }
 chrono = { workspace = true }
-once_cell = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
 tokio = { workspace = true, features = ["full", "signal"] }
 tokio-cron-scheduler = { workspace = true }
