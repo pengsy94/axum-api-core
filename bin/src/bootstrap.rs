@@ -4,19 +4,20 @@ use axum::{
     http::{Method, StatusCode},
 };
 use common::config::{AppConfig, server_config};
+use orm::DatabaseManager;
 use std::net::SocketAddr;
 use tower_http::{
     compression::{CompressionLayer, DefaultPredicate, Predicate, predicate::NotForContentType},
     cors::{Any, CorsLayer},
 };
 
-
 pub async fn make() -> anyhow::Result<(Router, SocketAddr)> {
     // 初始化配置（只调用一次）
     AppConfig::init()?;
-
     // 构建应用
     let (app, listener) = build_router().await?;
+    // 初始化数据库信息
+    DatabaseManager::init().await?;
 
     // 打印系统信息
     core::system::show();
@@ -30,8 +31,6 @@ async fn handle_404() -> (StatusCode, &'static str) {
 
 async fn build_router() -> anyhow::Result<(Router, SocketAddr)> {
     let config = server_config();
-
-    // 注册容器
 
     let app = route::build_router().fallback(handle_404);
     let app = match &config.content_gzip {

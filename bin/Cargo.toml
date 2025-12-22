@@ -9,6 +9,7 @@ version.workspace = true
 api = { path = "../api" }
 common = { path = "../common" }
 core = { path = "../core" }
+orm = { path = "../orm" }
 
 axum = { workspace = true }
 axum-server = { workspace = true, features = ["tls-rustls"] }

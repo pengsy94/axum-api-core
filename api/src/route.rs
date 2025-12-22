@@ -6,6 +6,7 @@ use axum::response::{Html, IntoResponse};
 use axum::routing::{get, get_service};
 use common::config::{RESOURCE_DIR, WEB_STATIC_DIR, server_config};
 use core::engine;
+use orm::repository::sys_user;
 use tower_http::services::ServeDir;
 
 pub fn build_router() -> Router {
@@ -40,12 +41,9 @@ fn add_web_routes(mut router: Router) -> Router {
 }
 
 async fn index() -> impl IntoResponse {
-    let data = std::collections::HashMap::from([
-        ("title", "首页 - Axum - Blade 模板示例"),
-        ("welcome_message", "欢迎来到 Axum - Blade 模板世界"),
-    ]);
+    let sys_user_data = sys_user::get_by_id("2").await.unwrap();
 
-    match engine::blade::render_map("index", data) {
+    match engine::blade::render_with_struct("index", &sys_user_data) {
         Ok(html) => Html(html).into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e).into_response(),
     }
@@ -55,9 +53,7 @@ async fn websocket() -> impl IntoResponse {
     let config = server_config();
 
     let ws_url = format!("ws://127.0.0.1:{}{}", config.port, config.ws_path);
-    let data = std::collections::HashMap::from([
-        ("ws_url", ws_url.as_str())
-    ]);
+    let data = std::collections::HashMap::from([("ws_url", ws_url.as_str())]);
 
     match engine::blade::render_map("websocket/index", data) {
         Ok(html) => Html(html).into_response(),

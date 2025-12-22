@@ -27,6 +27,9 @@ pub fn render_map(template_name: &str, data: HashMap<&str, &str>) -> Result<Stri
     let template_name = ensure_suffix(template_name);
     let tera = TERA_CACHE.lock().unwrap();
 
+    println!("Searching templates with template_name: {}", template_name);
+    println!("Searching templates with tera: {:?}", tera);
+
     match tera.render(&template_name, &context) {
         Ok(html) => Ok(html),
         Err(e) => Err(format!("Template error: {}", e)),
@@ -58,6 +61,7 @@ pub fn render_with_struct<T: serde::Serialize>(
     let template_name = ensure_suffix(template_name);
     let tera = TERA_CACHE.lock().unwrap();
 
+    println!("Searching templates with tera: {:?}", tera);
     match tera.render(&template_name, &context) {
         Ok(html) => Ok(html),
         Err(e) => Err(format!("Template error: {}", e)),

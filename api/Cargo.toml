@@ -7,6 +7,7 @@ version.workspace = true
 [dependencies]
 common = { path = "../common" }
 core = { path = "../core" }
+orm = { path = "../orm" }
 
 axum = { workspace = true, features = ["multipart", "ws"] }
 tower-http = { workspace = true, features = ["full", "fs", "cors", "trace"] }
