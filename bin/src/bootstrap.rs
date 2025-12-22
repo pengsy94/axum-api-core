@@ -57,7 +57,7 @@ async fn build_application() -> anyhow::Result<(Router, TcpListener)> {
 }
 
 fn setup_cors() -> CorsLayer {
-    let methods = vec![Method::GET, Method::HEAD, Method::OPTIONS];
+    let methods = vec![Method::GET, Method::POST, Method::HEAD, Method::OPTIONS];
 
     CorsLayer::new()
         .allow_methods(methods)
