@@ -2,6 +2,7 @@ use crate::api;
 use std::sync::Arc;
 
 use crate::websocket::models::ConnectionManager;
+use axum::http::StatusCode;
 use axum::{Router, middleware, routing::get};
 use kernel::config::server_config;
 use middleware_fn::request::{logging_middleware, rate_limiter};
@@ -34,7 +35,9 @@ pub fn build_router() -> Router {
         router = router.layer(middleware::from_fn(logging_middleware));
     }
 
-    router.layer(middleware::from_fn(rate_limiter)) // 整体限流
+    router
+        .layer(middleware::from_fn(rate_limiter)) // 整体限流
+        .fallback(handle_404)
 }
 
 fn add_api_routes(mut router: Router) -> Router {
@@ -45,4 +48,8 @@ fn add_api_routes(mut router: Router) -> Router {
 
 async fn index() -> &'static str {
     "Welcome to Axum Api Core!"
+}
+
+async fn handle_404() -> (StatusCode, &'static str) {
+    (StatusCode::NOT_FOUND, "Not found")
 }

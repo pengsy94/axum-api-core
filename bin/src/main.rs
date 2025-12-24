@@ -1,16 +1,17 @@
+use bootstrap::logger;
+
 mod bootstrap;
-mod logger;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // 服务应用初始化
-    let (app, listener, scheduler_manager) = bootstrap::make().await?;
+    let (make_service, listener, scheduler_manager) = bootstrap::make().await?;
 
     // 日志服务初始化(接收)
     let _logger = logger::Logger::init();
 
     tokio::select! {
-        server_result =  axum::serve(listener, app) => {
+        server_result =  axum::serve(listener, make_service) => {
             if let Err(e) = server_result {
                 eprintln!("\n❌ 服务器异常错误: {}", e);
                 std::process::exit(1);

@@ -1,5 +1,5 @@
 [package]
-name = "http"
+name = "app"
 edition.workspace = true
 publish.workspace = true
 version.workspace = true

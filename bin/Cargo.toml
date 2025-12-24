@@ -6,7 +6,7 @@ publish.workspace = true
 version.workspace = true
 
 [dependencies]
-http = { path = "../http" }
+app = { path = "../app" }
 common = { path = "../common" }
 kernel = { path = "../kernel" }
 database = { path = "../database" }
@@ -15,8 +15,8 @@ axum = { workspace = true }
 anyhow = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros", "parking_lot", "signal"] }
 tower-http = { workspace = true, features = ["cors", "fs", "compression-gzip"] }  #compression-gzip
-time = { workspace = true }
+chrono = { workspace = true }
 tracing = { workspace = true }
+time = { workspace = true }
 tracing-appender = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter", "local-time"] }
-chrono = { workspace = true }
