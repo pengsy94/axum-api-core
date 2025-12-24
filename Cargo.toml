@@ -13,7 +13,7 @@ resolver = "3"
 authors = ["pengsy <songyang410@outlook.com>"]
 edition = "2024"
 homepage = "https://github.com/pengsy94"
-license = "Apache-2.0"
+license = "MIT"
 publish = false
 version = "0.1.0"
 
@@ -39,5 +39,6 @@ sea-orm = "2.0.0-rc.22"
 http = "1.4.0"
 
 [profile.release]
-opt-level = 2        # 从 3 降到 2（平衡性能和编译兼容性）
+debug = false
+opt-level = 3        # 从 3 降到 2（平衡性能和编译兼容性）
 
