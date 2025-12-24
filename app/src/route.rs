@@ -40,10 +40,10 @@ pub fn build_router() -> Router {
         .fallback(handle_404)
 }
 
-fn add_api_routes(mut router: Router) -> Router {
-    router = router.route("/", get(index).post(index));
-
+fn add_api_routes(router: Router) -> Router {
     router
+        .route("/", get(index).post(index))
+        .nest("/index", Router::new().route("/", get(index)))
 }
 
 async fn index() -> &'static str {
