@@ -1,13 +1,17 @@
+use app::route;
 use axum::Router;
 use axum::http::Method;
-use app::route;
-use kernel::config::{AppConfig, server_config};
+use database::DatabaseManager;
+use kernel::config::AppConfig;
+use kernel::config::server_config;
 use kernel::tasks::manager::SchedulerManager;
 use tokio::net::TcpListener;
+use tower_http::compression::CompressionLayer;
+use tower_http::compression::DefaultPredicate;
+use tower_http::compression::Predicate;
 use tower_http::compression::predicate::NotForContentType;
-use tower_http::compression::{CompressionLayer, DefaultPredicate, Predicate};
-use tower_http::cors::{Any, CorsLayer};
-use database::DatabaseManager;
+use tower_http::cors::Any;
+use tower_http::cors::CorsLayer;
 
 pub mod logger;
 
