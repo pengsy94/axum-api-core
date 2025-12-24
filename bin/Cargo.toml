@@ -8,7 +8,7 @@ version.workspace = true
 [dependencies]
 http = { path = "../http" }
 common = { path = "../common" }
-core = { path = "../core" }
+kernel = { path = "../kernel" }
 database = { path = "../database" }
 
 axum = { workspace = true }

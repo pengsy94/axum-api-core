@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use crate::websocket::models::ConnectionManager;
 use axum::{Router, middleware, routing::get};
-use common::config::server_config;
+use kernel::config::server_config;
 use middleware_fn::request::{logging_middleware, rate_limiter};
 
 pub fn build_router() -> Router {

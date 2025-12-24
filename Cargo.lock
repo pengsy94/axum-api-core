@@ -218,9 +218,9 @@ dependencies = [
  "axum",
  "chrono",
  "common",
- "core",
  "database",
  "http 0.1.0",
+ "kernel",
  "time",
  "tokio",
  "tower-http",
@@ -372,8 +372,8 @@ dependencies = [
 name = "common"
 version = "0.1.0"
 dependencies = [
- "dotenvy",
- "thiserror",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -407,19 +407,6 @@ name = "const-oid"
 version = "0.9.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2459377285ad874054d797f3ccebf984978aa39129f6eafde5cdc8315b612f8"
-
-[[package]]
-name = "core"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "common",
- "num_cpus",
- "tokio",
- "tokio-cron-scheduler",
- "tracing",
- "uuid",
-]
 
 [[package]]
 name = "core-foundation"
@@ -561,9 +548,10 @@ name = "database"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "common",
+ "kernel",
  "sea-orm",
  "serde",
+ "strum",
 ]
 
 [[package]]
@@ -1009,8 +997,8 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "common",
- "database",
  "futures-util",
+ "kernel",
  "middleware-fn",
  "serde",
  "serde_json",
@@ -1317,6 +1305,20 @@ checksum = "464a3709c7f55f1f721e5389aa6ea4e3bc6aba669353300af094b29ffbdde1d8"
 dependencies = [
  "once_cell",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "kernel"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "dotenvy",
+ "num_cpus",
+ "thiserror",
+ "tokio",
+ "tokio-cron-scheduler",
+ "tracing",
+ "uuid",
 ]
 
 [[package]]

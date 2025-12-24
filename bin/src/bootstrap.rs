@@ -1,16 +1,18 @@
-use http::route;
-use axum::{
-    Router,
-    http::{Method, StatusCode},
-};
-use common::config::{AppConfig, server_config};
-use core::tasks::manager::SchedulerManager;
+use axum::Router;
+use axum::http::Method;
+use axum::http::StatusCode;
+use kernel::config::AppConfig;
+use kernel::config::server_config;
+use kernel::tasks::manager::SchedulerManager;
 use database::DatabaseManager;
+use http::route;
 use tokio::net::TcpListener;
-use tower_http::{
-    compression::{CompressionLayer, DefaultPredicate, Predicate, predicate::NotForContentType},
-    cors::{Any, CorsLayer},
-};
+use tower_http::compression::CompressionLayer;
+use tower_http::compression::DefaultPredicate;
+use tower_http::compression::Predicate;
+use tower_http::compression::predicate::NotForContentType;
+use tower_http::cors::Any;
+use tower_http::cors::CorsLayer;
 
 pub async fn make() -> anyhow::Result<(Router, TcpListener, SchedulerManager)> {
     // 初始化配置（只调用一次）
@@ -20,7 +22,7 @@ pub async fn make() -> anyhow::Result<(Router, TcpListener, SchedulerManager)> {
     // 初始化数据库信息
     DatabaseManager::init().await?;
     // 打印系统信息
-    core::system::show();
+    kernel::system::show();
     // 创建调度器管理器
     let scheduler_manager = SchedulerManager::new();
     // 启动定时任务

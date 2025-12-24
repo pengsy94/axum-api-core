@@ -5,10 +5,11 @@ publish.workspace = true
 version.workspace = true
 
 [dependencies]
-common = { path = "../common" }
+kernel = { path = "../kernel" }
 
 anyhow = { workspace = true }
 sea-orm = { workspace = true, features = ["sqlx-mysql", "macros", "runtime-tokio-native-tls", "with-chrono"] }
+strum = { workspace = true, features = ["derive"] }
 serde = { workspace = true, features = ["derive"] }
 
 [features]

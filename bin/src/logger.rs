@@ -1,4 +1,4 @@
-use common::config::server_config;
+use kernel::config::server_config;
 use std::env;
 #[cfg(target_os = "windows")]
 use time::format_description::well_known::Rfc3339;

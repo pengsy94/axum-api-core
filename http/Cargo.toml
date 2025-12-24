@@ -6,7 +6,7 @@ version.workspace = true
 
 [dependencies]
 common = { path = "../common" }
-database = { path = "../database" }
+kernel = { path = "../kernel" }
 middleware-fn = { path = "../middleware-fn" }
 
 axum = { workspace = true, features = ["multipart", "ws"] }

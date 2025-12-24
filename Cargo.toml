@@ -2,7 +2,7 @@
 members = [
     "bin",
     "common",
-    "core",
+    "kernel",
     "database",
     "http",
     "middleware-fn"
@@ -36,6 +36,7 @@ chrono = "0.4.42"
 futures-util = "0.3.31"
 uuid = "1.19.0"
 sea-orm = "2.0.0-rc.22"
+strum = { version = "0.27.2" }
 http = "1.4.0"
 
 [profile.release]

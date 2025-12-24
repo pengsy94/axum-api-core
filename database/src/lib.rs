@@ -1,10 +1,9 @@
-pub mod entities;
+pub mod entity;
 pub mod repository;
 
 pub struct DatabaseManager;
 
-// db/src/lib.rs
-use common::config::database_config;
+use kernel::config::database_config;
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use std::sync::Arc;
 use std::sync::OnceLock;

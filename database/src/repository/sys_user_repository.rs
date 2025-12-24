@@ -2,8 +2,8 @@ use anyhow::{Result, anyhow};
 use sea_orm::{IntoActiveModel, QueryFilter};
 use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, EntityTrait, TransactionTrait};
 
-use crate::entities::sys_user;
-use crate::entities::sys_user::ActiveModel;
+use crate::entity::sys_user;
+use crate::entity::sys_user::ActiveModel;
 use crate::get_db_unwrap;
 
 pub async fn get_by_id(user_id: &str) -> Result<sys_user::Model> {
