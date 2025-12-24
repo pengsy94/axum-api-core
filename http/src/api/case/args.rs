@@ -15,7 +15,7 @@ pub struct Page {
 }
 
 pub async fn sys_test() -> Html<&'static str> {
-    tracing::info!("/api/test");
+    tracing::info!("/http/test");
     Html("<html><h1>Hello, test!</h1><h2>你好, 测试!</h2></html>")
 }
 

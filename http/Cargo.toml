@@ -1,17 +1,15 @@
 [package]
-name = "api"
+name = "http"
 edition.workspace = true
 publish.workspace = true
 version.workspace = true
 
 [dependencies]
 common = { path = "../common" }
-core = { path = "../core" }
 database = { path = "../database" }
 middleware-fn = { path = "../middleware-fn" }
 
 axum = { workspace = true, features = ["multipart", "ws"] }
-tower-http = { workspace = true, features = ["full", "fs", "cors", "trace"] }
 serde = { workspace = true, features = ["derive"] }
 tokio = { workspace = true }
 tracing = { workspace = true }

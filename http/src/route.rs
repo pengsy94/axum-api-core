@@ -1,0 +1,48 @@
+use crate::api;
+use std::sync::Arc;
+
+use crate::websocket::models::ConnectionManager;
+use axum::{Router, middleware, routing::get};
+use common::config::server_config;
+use middleware_fn::request::{logging_middleware, rate_limiter};
+
+pub fn build_router() -> Router {
+    let config = server_config();
+
+    let mut router = Router::new();
+
+    // ws服务
+    if config.ws_open {
+        // 创建连接管理器
+        let connection_manager = Arc::new(ConnectionManager::new());
+        router = router.nest(
+            &config.ws_path,
+            crate::websocket::set_websocket_api(connection_manager),
+        );
+    }
+
+    if config.debug {
+        //  测试模块
+        router = router.nest("/test", api::case::set_test_api());
+    }
+
+    // 添加 API 路由
+    router = add_api_routes(router);
+
+    if config.log_enable_oper_log {
+        // 整体记录请求
+        router = router.layer(middleware::from_fn(logging_middleware));
+    }
+
+    router.layer(middleware::from_fn(rate_limiter)) // 整体限流
+}
+
+fn add_api_routes(mut router: Router) -> Router {
+    router = router.route("/", get(index).post(index));
+
+    router
+}
+
+async fn index() -> &'static str {
+    "Welcome to Axum Api Core!"
+}

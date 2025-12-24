@@ -1,10 +1,10 @@
 [workspace]
 members = [
-    "api",
     "bin",
     "common",
     "core",
     "database",
+    "http",
     "middleware-fn"
 ]
 resolver = "3"

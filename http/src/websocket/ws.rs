@@ -11,7 +11,7 @@ use axum::{
 use futures_util::{SinkExt, StreamExt};
 use tokio::sync::mpsc;
 use uuid::Uuid;
-use crate::routes::websocket::models::{ClientMessage, ConnectionManager, ServerMessage};
+use crate::websocket::models::{ClientMessage, ConnectionManager, ServerMessage};
 
 /// WebSocket 升级处理
 pub async fn websocket_handler(

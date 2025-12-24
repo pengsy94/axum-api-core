@@ -6,7 +6,7 @@ publish.workspace = true
 version.workspace = true
 
 [dependencies]
-api = { path = "../api" }
+http = { path = "../http" }
 common = { path = "../common" }
 core = { path = "../core" }
 database = { path = "../database" }

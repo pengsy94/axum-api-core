@@ -1,4 +1,4 @@
-use api::route;
+use http::route;
 use axum::{
     Router,
     http::{Method, StatusCode},
@@ -19,10 +19,8 @@ pub async fn make() -> anyhow::Result<(Router, TcpListener, SchedulerManager)> {
     let (app, listener) = build_application().await?;
     // 初始化数据库信息
     DatabaseManager::init().await?;
-
     // 打印系统信息
     core::system::show();
-
     // 创建调度器管理器
     let scheduler_manager = SchedulerManager::new();
     // 启动定时任务

@@ -9,9 +9,7 @@ common = { path = "../common" }
 
 anyhow = { workspace = true }
 sea-orm = { workspace = true, features = ["sqlx-mysql", "macros", "runtime-tokio-native-tls", "with-chrono"] }
-tokio = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-serde_json = { workspace = true }
 
 [features]
 default = ["postgres", "mysql", "sqlite"]
