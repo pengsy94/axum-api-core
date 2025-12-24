@@ -5,7 +5,6 @@ publish.workspace = true
 version.workspace = true
 
 [dependencies]
-
 chrono = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
 tokio = { workspace = true, features = ["full", "signal", "rt-multi-thread", "macros", "parking_lot", "signal"] }

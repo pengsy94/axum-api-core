@@ -1,5 +1,5 @@
-use chrono::Local;
 use crate::config::server_config;
+use chrono::Local;
 use std::{env, process};
 
 pub fn show() {
@@ -7,7 +7,7 @@ pub fn show() {
 
     let config = server_config();
 
-    println!("{:>2} Axum [v0.8.8] 服务启动成功!!!", "🎉🎉🎉");
+    println!("{:>2} Axum 服务启动成功!!!", "🎉🎉🎉");
     println!();
 
     #[cfg(target_os = "windows")]
