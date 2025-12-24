@@ -1,5 +1,5 @@
 use chrono::Local;
-use common::config::server_config;
+use crate::config::server_config;
 use std::{env, process};
 
 pub fn show() {

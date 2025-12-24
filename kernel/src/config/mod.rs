@@ -1,12 +1,12 @@
 mod database_config;
+pub mod error;
 mod server_config;
 
 use dotenvy::dotenv;
 use std::sync::OnceLock;
 
-use crate::config::database_config::DatabaseConfig;
-use crate::config::server_config::ServerConfig;
-use crate::error::ConfigError;
+use crate::config::{database_config::DatabaseConfig, server_config::ServerConfig};
+use error::ConfigError;
 
 /// 应用配置
 #[derive(Debug, Clone)]

@@ -3,7 +3,7 @@ use tokio::sync::RwLock;
 use tokio_cron_scheduler::{Job, JobScheduler, JobSchedulerError, job::JobCreator};
 use tracing::error;
 use uuid::Uuid;
-use common::config::server_config;
+use crate::config::server_config;
 use crate::tasks::task_one;
 
 // 定义扩展 trait

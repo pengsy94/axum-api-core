@@ -1,4 +1,4 @@
-use crate::error::ConfigError;
+use crate::config::error::ConfigError;
 use std::env;
 use std::net::IpAddr;
 
@@ -26,7 +26,7 @@ pub struct ServerConfig {
 
 impl ServerConfig {
     /// 从环境变量创建服务器配置
-    pub(crate) fn from_env() -> Result<Self, ConfigError> {
+    pub fn from_env() -> Result<Self, ConfigError> {
         let debug = env::var("DEBUG")
             .unwrap_or_else(|_| "true".to_string())
             .parse::<bool>()

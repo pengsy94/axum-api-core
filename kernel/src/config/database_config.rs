@@ -1,4 +1,4 @@
-use crate::error::ConfigError;
+use crate::config::error::ConfigError;
 use std::env;
 
 /// 数据库配置
@@ -12,7 +12,7 @@ pub struct DatabaseConfig {
 
 impl DatabaseConfig {
     /// 从环境变量创建数据库配置
-    pub(crate) fn from_env() -> Result<Self, ConfigError> {
+    pub fn from_env() -> Result<Self, ConfigError> {
         let database_url = env::var("DATABASE_URL")
             .unwrap_or_else(|_| "mysql://root:root@localhost:3306/database".to_string())
             .parse::<String>()

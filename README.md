@@ -10,7 +10,7 @@
   # 先安装自动生成实体工具cli
   cargo install sea-orm-cli
   # 执行生成实体命令 -o 指定生成实体的文件目录 --with-serde 指定Model允许序列化和反序列化
-  sea-orm-cli generate entity -u mysql://root:root@127.0.0.1:3306/axum_db --with-serde both -o database/src/entities 
+  sea-orm-cli generate entity -u mysql://root:root@127.0.0.1:3306/axum_db --with-serde both -o database/src/entity 
 ```
 
 ### 关于 websocket
