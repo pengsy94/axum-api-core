@@ -19,7 +19,6 @@ version = "0.1.0"
 
 [workspace.dependencies]
 axum = "0.8.8"
-async-trait = "0.1.89"
 anyhow = "1.0.100"
 dotenvy = "0.15.7"
 num_cpus = "1.17.0"
@@ -39,7 +38,6 @@ uuid = "1.19.0"
 sea-orm = "2.0.0-rc.22"
 strum = "0.27.2"
 http = "1.4.0"
-http-body = "1.0.1"
 validator = "0.20.0"
 futures = "0.3.31"
 

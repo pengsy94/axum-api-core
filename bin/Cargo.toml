@@ -7,7 +7,6 @@ version.workspace = true
 
 [dependencies]
 app = { path = "../app" }
-common = { path = "../common" }
 kernel = { path = "../kernel" }
 database = { path = "../database" }
 
