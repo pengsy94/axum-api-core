@@ -5,6 +5,10 @@ publish.workspace = true
 version.workspace = true
 
 [dependencies]
+axum = { workspace = true }
+async-trait = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
-
+validator = { workspace = true, features = ["derive"] }
+http-body = { workspace = true }
+futures = { workspace = true }

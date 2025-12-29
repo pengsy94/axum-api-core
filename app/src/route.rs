@@ -2,7 +2,10 @@ use crate::api;
 use std::sync::Arc;
 
 use axum::http::StatusCode;
-use axum::{Router, middleware, routing::get};
+use axum::{
+    Router, middleware,
+    routing::{get, post},
+};
 use kernel::config::server_config;
 use middleware_fn::request::{logging_middleware, rate_limiter};
 
@@ -44,6 +47,10 @@ fn add_api_routes(router: Router) -> Router {
     router
         .route("/", get(index).post(index))
         .nest("/index", Router::new().route("/", get(index)))
+        .nest(
+            "/api",
+            Router::new().route("/login", post(api::system::login)),
+        )
 }
 
 async fn index() -> &'static str {
