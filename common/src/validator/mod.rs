@@ -1,7 +1,7 @@
 pub mod query;
 pub mod path;
 pub mod json;
-mod form;
+pub mod form;
 
 use crate::response::error::FieldError;
 use validator::{ValidationErrors, ValidationErrorsKind};
