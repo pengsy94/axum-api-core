@@ -7,14 +7,14 @@ pub struct FieldError {
     pub message: String,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize, Default)]
 pub struct ErrorResponse {
     pub code: i32,
     pub message: String,
     pub errors: Option<Vec<FieldError>>,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize, Default)]
 pub struct ApiResponse<T> {
     pub code: i32,
     pub message: String,
