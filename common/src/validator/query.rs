@@ -1,11 +1,11 @@
-use crate::response::error::{ErrorResponse, FieldError};
+use crate::utils::response::{ErrorResponse, FieldError};
 use crate::validator::validation_errors_to_fields;
 
 use axum::{
-    Json,
     extract::{FromRequestParts, Query},
-    http::{StatusCode, request::Parts},
+    http::{request::Parts, StatusCode},
     response::{IntoResponse, Response},
+    Json,
 };
 use serde::de::DeserializeOwned;
 use validator::Validate;
@@ -28,9 +28,9 @@ where
                 .await
                 .map_err(|e| {
                     return (
-                        StatusCode::BAD_REQUEST,
+                        StatusCode::OK,
                         Json(ErrorResponse {
-                            code: 400,
+                            code: 500,
                             message: "Query 参数解析失败".into(),
                             errors: Some(vec![FieldError {
                                 field: "query".into(),
@@ -43,9 +43,9 @@ where
 
             if let Err(err) = value.validate() {
                 return Err((
-                    StatusCode::UNPROCESSABLE_ENTITY,
+                    StatusCode::OK,
                     Json(ErrorResponse {
-                        code: 422,
+                        code: 500,
                         message: "Query 参数校验失败".into(),
                         errors: Some(validation_errors_to_fields(err)),
                     }),

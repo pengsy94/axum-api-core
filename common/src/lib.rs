@@ -2,5 +2,5 @@ pub mod request;
 pub mod response;
 
 pub mod validator;
-mod utils;
+pub mod utils;
 

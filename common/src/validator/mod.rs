@@ -3,7 +3,7 @@ pub mod path;
 pub mod json;
 pub mod form;
 
-use crate::response::error::FieldError;
+use crate::utils::response::FieldError;
 use validator::{ValidationErrors, ValidationErrorsKind};
 
 /// validator -> FieldError 转换

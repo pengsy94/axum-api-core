@@ -1,4 +1,4 @@
-use crate::response::error::{ErrorResponse, FieldError};
+use crate::utils::response::{ErrorResponse, FieldError};
 use crate::validator::validation_errors_to_fields;
 
 use axum::{
@@ -28,9 +28,9 @@ where
                 .await
                 .map_err(|e| {
                     return (
-                        StatusCode::BAD_REQUEST,
+                        StatusCode::OK,
                         Json(ErrorResponse {
-                            code: 400,
+                            code: 500,
                             message: "Path 参数解析失败".into(),
                             errors: Some(vec![FieldError {
                                 field: "Path".into(),
@@ -43,9 +43,9 @@ where
 
             if let Err(err) = value.validate() {
                 return Err((
-                    StatusCode::UNPROCESSABLE_ENTITY,
+                    StatusCode::OK,
                     Json(ErrorResponse {
-                        code: 422,
+                        code: 500,
                         message: "Path 参数校验失败".into(),
                         errors: Some(validation_errors_to_fields(err)),
                     }),
