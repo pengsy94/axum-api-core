@@ -388,7 +388,9 @@ name = "common"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "mime",
  "serde",
+ "serde_json",
  "validator",
 ]
 

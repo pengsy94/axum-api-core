@@ -45,5 +45,5 @@ content-type: application/json;charset=UTF-8
 
 {
   "email": "11@qq.com",
-  "password": ""
+  "password": "1111111"
 }
