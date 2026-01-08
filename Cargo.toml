@@ -44,5 +44,5 @@ mime = "0.3.17"
 
 [profile.release]
 debug = false
-opt-level = 3        # 从 3 降到 2（平衡性能和编译兼容性）
+opt-level = 3
 
