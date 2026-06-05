@@ -7,6 +7,7 @@
 - ⚡ **Axum 0.8.8** — 高性能异步 HTTP 框架
 - 🧱 **模块化 workspace** — 7 个 crate 职责清晰
 - 📦 **数据库可选** — 不配 `DATABASE_URL` 也能跑
+- ⚡ **Redis 缓存** — 可选，一行代码读写缓存
 - 🔐 **JWT + argon2** — 真实 JWT 签发验证 + 密码哈希
 - 📋 **请求追踪** — 每个请求自动注入 `X-Trace-Id` 关联日志
 - 🚦 **限流 / 超时 / CORS / Gzip** — 全部可配置
@@ -105,6 +106,33 @@ sea-orm-cli generate entity \
   -u mysql://root:password@localhost:3306/database \
   --with-serde both \
   -o database/src/entity
+```
+
+## ⚡ Redis 缓存
+
+可选，`REDIS_URL` 留空时跳过初始化。
+
+```bash
+# 配置（格式：redis://[:password]@host:port）
+REDIS_URL=redis://:password@localhost:6379
+REDIS_POOL_SIZE=4
+```
+
+```rust
+use database::Cache;
+
+// 字符串
+Cache::set("key", "value").await?;
+let val: Option<String> = Cache::get("key").await?;
+Cache::setex("token:abc", 3600, "user_id").await?;
+Cache::del("key").await?;
+
+// 哈希
+Cache::hset("user:1", "name", "张三").await?;
+let name: Option<String> = Cache::hget("user:1", "name").await?;
+
+// 判断
+let exists = Cache::exists("key").await?;
 ```
 
 ## 🔐 JWT 认证
