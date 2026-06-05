@@ -2,7 +2,7 @@ pub mod entity;
 pub mod redis;
 pub mod repository;
 
-pub use redis::RedisManager;
+pub use redis::{Cache, RedisManager};
 pub use redis::get_redis;
 
 pub struct DatabaseManager;
