@@ -1,18 +1,15 @@
 use app::route;
 use axum::Router;
 use axum::http::{HeaderValue, Method, StatusCode};
-use std::sync::OnceLock;
-use std::time::Duration;
-use tower_http::timeout::TimeoutLayer;
-
-static PROMETHEUS_HANDLE: OnceLock<metrics_exporter_prometheus::PrometheusHandle> = OnceLock::new();
 use axum::response::Json;
 use axum::routing::get;
 use database::DatabaseManager;
-use serde_json::json;
 use kernel::config::AppConfig;
 use kernel::config::server_config;
 use kernel::tasks::manager::SchedulerManager;
+use serde_json::json;
+use std::sync::OnceLock;
+use std::time::Duration;
 use tokio::net::TcpListener;
 use tower_http::compression::CompressionLayer;
 use tower_http::compression::DefaultPredicate;
@@ -21,8 +18,11 @@ use tower_http::compression::predicate::NotForContentType;
 use tower_http::cors::AllowOrigin;
 use tower_http::cors::Any;
 use tower_http::cors::CorsLayer;
+use tower_http::timeout::TimeoutLayer;
 
 pub mod logger;
+
+static PROMETHEUS_HANDLE: OnceLock<metrics_exporter_prometheus::PrometheusHandle> = OnceLock::new();
 
 pub async fn make() -> anyhow::Result<(Router, TcpListener, SchedulerManager)> {
     // 初始化配置（只调用一次）
@@ -66,7 +66,10 @@ async fn build_application() -> anyhow::Result<(Router, TcpListener)> {
     // 请求超时中间件
     let app = match config.request_timeout_seconds {
         0 => app,
-        secs => app.layer(TimeoutLayer::with_status_code(StatusCode::REQUEST_TIMEOUT, Duration::from_secs(secs))),
+        secs => app.layer(TimeoutLayer::with_status_code(
+            StatusCode::REQUEST_TIMEOUT,
+            Duration::from_secs(secs),
+        )),
     };
 
     // 添加 /metrics 端点
@@ -76,8 +79,7 @@ async fn build_application() -> anyhow::Result<(Router, TcpListener)> {
     let make_service = app.layer(setup_cors());
 
     // 就绪检查（依赖数据库连接）
-    let make_service = make_service
-        .route("/ready", get(ready_check));
+    let make_service = make_service.route("/ready", get(ready_check));
 
     let addr = format!("{}:{}", config.host, config.port);
     let listener = TcpListener::bind(addr).await?;
@@ -97,13 +99,22 @@ async fn ready_check() -> (StatusCode, Json<serde_json::Value>) {
     if kernel::config::database_config().enabled {
         // 启用了数据库：检查连接池
         if database::get_db().is_some() {
-            (StatusCode::OK, Json(json!({ "status": "ready", "database": "connected" })))
+            (
+                StatusCode::OK,
+                Json(json!({ "status": "ready", "database": "connected" })),
+            )
         } else {
-            (StatusCode::SERVICE_UNAVAILABLE, Json(json!({ "status": "not_ready", "database": "disconnected" })))
+            (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Json(json!({ "status": "not_ready", "database": "disconnected" })),
+            )
         }
     } else {
         // 未启用数据库：仅检查服务存活
-        (StatusCode::OK, Json(json!({ "status": "ready", "database": "disabled" })))
+        (
+            StatusCode::OK,
+            Json(json!({ "status": "ready", "database": "disabled" })),
+        )
     }
 }
 
@@ -120,7 +131,11 @@ fn setup_cors() -> CorsLayer {
         let origins = config
             .cors_allowed_origins
             .split(',')
-            .map(|s| s.trim().parse::<HeaderValue>().expect("无效的 CORS_ALLOWED_ORIGINS 值"))
+            .map(|s| {
+                s.trim()
+                    .parse::<HeaderValue>()
+                    .expect("无效的 CORS_ALLOWED_ORIGINS 值")
+            })
             .collect::<Vec<_>>();
         CorsLayer::new()
             .allow_methods(methods)
