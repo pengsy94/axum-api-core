@@ -9,8 +9,8 @@ kernel = { path = "../kernel" }
 
 anyhow = { workspace = true }
 sea-orm = { workspace = true, features = ["sqlx-mysql", "macros", "runtime-tokio-native-tls", "with-chrono"] }
-strum = { workspace = true, features = ["derive"] }
 serde = { workspace = true, features = ["derive"] }
+tracing = { workspace = true }
 
 [features]
 default = ["postgres", "mysql", "sqlite"]

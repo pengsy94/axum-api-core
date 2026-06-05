@@ -11,6 +11,9 @@ pub enum ConfigError {
     #[error("Invalid value for environment variable {0}: {1}")]
     InvalidValue(String, String),
 
+    #[error("Validation failed: {0}")]
+    ValidationError(String),
+
     #[error("Failed to load .env file: {0}")]
     EnvLoadFailed(String),
 }

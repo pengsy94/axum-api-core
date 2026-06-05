@@ -7,7 +7,7 @@ version.workspace = true
 [dependencies]
 chrono = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
-tokio = { workspace = true, features = ["full", "signal", "rt-multi-thread", "macros", "parking_lot", "signal"] }
+tokio = { workspace = true, features = ["full"] }
 tokio-cron-scheduler = { workspace = true }
 tracing = { workspace = true }
 num_cpus = { workspace = true }

@@ -5,12 +5,14 @@ use axum::response::Response;
 use serde::Serialize;
 use std::fmt::Debug;
 
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[derive(Serialize, Clone, Debug)]
 pub struct FieldError {
     pub field: String,
     pub message: String,
 }
 
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[derive(Debug, Serialize, Default)]
 pub struct ErrorResponse {
     pub code: i32,
@@ -18,12 +20,16 @@ pub struct ErrorResponse {
     pub errors: Option<Vec<FieldError>>,
 }
 
+#[cfg_attr(feature = "openapi", derive(utoipa::ToSchema))]
 #[derive(Debug, Serialize, Default)]
 pub struct ApiResponse<T> {
+    /// 业务状态码（200 成功，非 200 失败）
     pub code: i32,
-    pub message: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    /// 响应数据（成功时有值，失败时为 null）
     pub data: Option<T>,
+    /// 提示信息
+    pub message: String,
+    /// 字段级错误列表（仅校验失败时携带）
     #[serde(skip_serializing_if = "Option::is_none")]
     pub errors: Option<Vec<FieldError>>,
 }
@@ -32,7 +38,6 @@ pub struct ApiResponse<T> {
 #[derive(Debug, Clone)]
 pub struct ResJsonString(pub String);
 
-#[allow(unconditional_recursion)]
 impl<T> IntoResponse for ApiResponse<T>
 where
     T: Serialize + Send + Sync + Debug + 'static,
@@ -143,9 +148,9 @@ impl<T: Serialize> ApiResponse<T> {
         }
     }
 
-    /// 检查是否是成功响应
+    /// 检查是否是成功响应（data 有值即为成功）
     pub fn is_success(&self) -> bool {
-        self.code == 0
+        self.data.is_some()
     }
 
     /// 获取数据（如果存在）

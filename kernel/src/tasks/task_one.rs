@@ -3,7 +3,7 @@ use tracing::{error, info};
 
 /// 实现示例任务
 pub fn handle_task() -> Result<JobLocked, JobSchedulerError> {
-    let jon = Job::new("*/10 * * * * *", |_uuid, _l| {
+    let job = Job::new("*/10 * * * * *", |_uuid, _l| {
         info!(
             "示例任务执行 - 时间: {}",
             chrono::Local::now().format("%Y-%m-%d %H:%M:%S")
@@ -11,9 +11,9 @@ pub fn handle_task() -> Result<JobLocked, JobSchedulerError> {
     });
 
     // 预先处理掉错误的情况
-    if let Err(e) = &jon {
+    if let Err(e) = &job {
         error!("{}", e);
     }
 
-    jon
+    job
 }

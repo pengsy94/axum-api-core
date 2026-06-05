@@ -38,12 +38,16 @@ impl AppConfig {
             .map_err(|_| ConfigError::AlreadyInitialized)
     }
 
-    /// 从环境变量创建配置
+    /// 从环境变量创建配置并校验
     fn from_env() -> Result<Self, ConfigError> {
-        Ok(Self {
-            server: ServerConfig::from_env()?,
-            database: DatabaseConfig::from_env()?,
-        })
+        let server = ServerConfig::from_env()?;
+        let database = DatabaseConfig::from_env()?;
+
+        // 校验配置值
+        server.validate()?;
+        database.validate()?;
+
+        Ok(Self { server, database })
     }
 
     /// 获取全局配置（初始化后使用）

@@ -28,7 +28,7 @@ where
                 .await
                 .map_err(|e| {
                     return (
-                        StatusCode::OK,
+                        StatusCode::BAD_REQUEST,
                         Json(ErrorResponse {
                             code: 500,
                             message: "Path 参数解析失败".into(),
@@ -43,7 +43,7 @@ where
 
             if let Err(err) = value.validate() {
                 return Err((
-                    StatusCode::OK,
+                    StatusCode::BAD_REQUEST,
                     Json(ErrorResponse {
                         code: 500,
                         message: "Path 参数校验失败".into(),

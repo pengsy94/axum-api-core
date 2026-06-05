@@ -5,7 +5,7 @@ members = [
     "common",
     "kernel",
     "database",
-    "middleware-fn"
+    "middleware"
 ]
 resolver = "3"
 
@@ -39,8 +39,8 @@ sea-orm = "2.0.0-rc.24"
 strum = "0.27.2"
 http = "1.4.0"
 validator = "0.20.0"
-futures = "0.3.31"
 mime = "0.3.17"
+utoipa = "5"
 
 [profile.release]
 debug = false

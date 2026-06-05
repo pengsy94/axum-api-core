@@ -1,5 +1,5 @@
 [package]
-name = "middleware-fn"
+name = "middleware"
 authors.workspace = true
 edition.workspace = true
 homepage.workspace = true
@@ -13,3 +13,5 @@ http = { workspace = true }
 tracing = { workspace = true }
 tokio = { workspace = true }
 serde_json = { workspace = true }
+uuid = { workspace = true, features = ["v4"] }
+common = { path = "../common" }

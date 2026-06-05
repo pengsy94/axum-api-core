@@ -20,9 +20,12 @@ async fn main() -> anyhow::Result<()> {
         _ = tokio::signal::ctrl_c() => {
             println!("\n🕞 接收到 Ctrl+C 信号，正在优雅关闭...");
 
-            // 调用调度器的关闭方法
+            // 关闭调度器
             let shutdown_future = scheduler_manager.shutdown_future();
             shutdown_future.await;
+
+            // 关闭数据库连接池
+            database::DatabaseManager::close();
         }
     }
 

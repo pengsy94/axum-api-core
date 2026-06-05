@@ -1,0 +1,19 @@
+# Git
+.git/
+.gitignore
+
+# Rust
+target/
+
+# IDE
+.idea/
+.vscode/
+
+# Environment
+.env
+
+# Logs
+logs/
+
+# Docker
+.dockerignore

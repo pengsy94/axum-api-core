@@ -1,31 +1,9 @@
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use tokio_cron_scheduler::{Job, JobScheduler, JobSchedulerError, job::JobCreator};
+use tokio_cron_scheduler::JobScheduler;
 use tracing::error;
-use uuid::Uuid;
 use crate::config::server_config;
 use crate::tasks::task_one;
-
-// 定义扩展 trait
-trait JobSchedulerExt {
-    async fn add_quietly(&self, job: Job) -> Result<Uuid, JobSchedulerError>;
-}
-
-// 为 JobScheduler 实现扩展
-impl JobSchedulerExt for JobScheduler {
-    async fn add_quietly(&self, job: Job) -> Result<Uuid, JobSchedulerError> {
-        let guid = job.guid();
-        if !self.inited().await {
-            let mut s = self.clone();
-            s.init().await?;
-        }
-
-        let context = self.context.clone();
-        JobCreator::add(&context, job).await?;
-
-        Ok(guid)
-    }
-}
 
 /// 调度器管理器
 pub struct SchedulerManager {
@@ -63,7 +41,7 @@ impl SchedulerManager {
     async fn add_jobs(&self, sched: &JobScheduler) -> Result<(), Box<dyn std::error::Error>> {
         // 示例任务
         if let Ok(job) = task_one::handle_task() {
-            sched.add_quietly(job).await?; // 加入调度器
+            sched.add(job).await?; // 加入调度器
         }
 
         Ok(())

@@ -9,7 +9,7 @@ use axum::{
     response::IntoResponse,
 };
 use futures_util::{SinkExt, StreamExt};
-use tokio::sync::mpsc;
+use tokio::sync::{broadcast, mpsc};
 use uuid::Uuid;
 use crate::websocket::models::{ClientMessage, ConnectionManager, ServerMessage};
 
@@ -29,8 +29,8 @@ async fn handle_websocket_connection(socket: WebSocket, state: Arc<ConnectionMan
 
     tracing::info!("处理客户端 {} 的 WebSocket 连接", client_id);
 
-    // 创建与客户端的通信通道
-    let (to_client_tx, mut to_client_rx) = mpsc::unbounded_channel();
+    // 创建与客户端的通信通道（有界，阈值 64）
+    let (to_client_tx, to_client_rx) = mpsc::channel::<String>(64);
 
     // 注册连接
     if !state.register(client_id.clone(), to_client_tx).await {
@@ -41,13 +41,16 @@ async fn handle_websocket_connection(socket: WebSocket, state: Arc<ConnectionMan
     // 拆分 WebSocket
     let (sender, receiver) = socket.split();
 
-    // 任务1：处理发送给客户端的消息
+    // 订阅广播通道
+    let broadcast_rx = state.subscribe_broadcast();
+
+    // 任务1：处理发送给客户端的消息（监听 mpsc + broadcast 双通道）
     let send_task = tokio::spawn({
         let state = state.clone();
         let client_id = client_id.clone();
 
         async move {
-            if let Err(e) = handle_send_task(sender, &mut to_client_rx, &state, &client_id).await {
+            if let Err(e) = handle_send_task(sender, to_client_rx, broadcast_rx, &client_id, &state).await {
                 tracing::error!("客户端 {} 发送任务错误: {}", client_id, e);
             }
             state.unregister(&client_id).await;
@@ -76,12 +79,13 @@ async fn handle_websocket_connection(socket: WebSocket, state: Arc<ConnectionMan
     state.unregister(&client_id).await;
 }
 
-/// 处理发送任务：从通道接收消息并发送给客户端
+/// 处理发送任务：从 mpsc 和 broadcast 两个通道接收消息并发送给客户端
 async fn handle_send_task(
     mut sender: futures_util::stream::SplitSink<WebSocket, Message>,
-    to_client_rx: &mut mpsc::UnboundedReceiver<String>,
-    state: &ConnectionManager,
+    mut to_client_rx: mpsc::Receiver<String>,
+    mut broadcast_rx: broadcast::Receiver<String>,
     client_id: &str,
+    state: &ConnectionManager,
 ) -> Result<(), String> {
     // 发送连接成功消息
     let connected_msg = serde_json::to_string(&ServerMessage::Connected {
@@ -95,12 +99,38 @@ async fn handle_send_task(
         .await
         .map_err(|e| format!("发送连接消息失败: {}", e))?;
 
-    // 循环处理来自通道的消息
-    while let Some(message) = to_client_rx.recv().await {
-        sender
-            .send(Message::Text(Utf8Bytes::from(message)))
-            .await
-            .map_err(|e| format!("发送消息失败: {}", e))?;
+    // 同时监听控制通道和广播通道
+    loop {
+        tokio::select! {
+            message = to_client_rx.recv() => {
+                match message {
+                    Some(msg) => {
+                        sender
+                            .send(Message::Text(Utf8Bytes::from(msg)))
+                            .await
+                            .map_err(|e| format!("发送消息失败: {}", e))?;
+                    }
+                    None => break, // mpsc 关闭，连接结束
+                }
+            }
+            result = broadcast_rx.recv() => {
+                match result {
+                    Ok(msg) => {
+                        sender
+                            .send(Message::Text(Utf8Bytes::from(msg)))
+                            .await
+                            .map_err(|e| format!("发送广播消息失败: {}", e))?;
+                    }
+                    Err(broadcast::error::RecvError::Lagged(n)) => {
+                        tracing::warn!("客户端 {} 广播消息滞后，丢失 {} 条", client_id, n);
+                    }
+                    Err(broadcast::error::RecvError::Closed) => {
+                        tracing::info!("客户端 {} 广播通道已关闭", client_id);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     Ok(())
@@ -215,23 +245,12 @@ async fn handle_parsed_message(
         }
 
         ClientMessage::Broadcast { message } => {
-            // 广播消息
+            // 广播消息（通过 broadcast 通道发送，所有订阅者都会收到，包括自己）
             let timestamp = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
                 .as_secs();
 
-            // 先给自己发送广播确认
-            let self_msg = serde_json::to_string(&ServerMessage::Broadcast {
-                from: client_id.to_string(),
-                message: message.clone(),
-                timestamp,
-            })
-                .map_err(|e| format!("序列化失败: {}", e))?;
-
-            let _ = state.send_to(client_id, self_msg).await;
-
-            // 广播给其他用户
             state.broadcast(client_id, &message, timestamp).await;
 
             Ok(())

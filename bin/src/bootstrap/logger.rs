@@ -1,8 +1,6 @@
 use kernel::config::server_config;
-use std::env;
 #[cfg(target_os = "windows")]
 use time::format_description::well_known::Rfc3339;
-use tracing::Level;
 use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::fmt::format::{Compact, Format};
 #[cfg(target_os = "windows")]
@@ -19,21 +17,6 @@ impl Logger {
     pub fn init() -> anyhow::Result<Self> {
         // 获取配置
         let config = server_config();
-        if env::var_os("RUST_LOG").is_none() {
-            unsafe {
-                env::set_var("RUST_LOG", &config.log_level.as_str());
-            }
-        }
-
-        // 系统变量设置
-        let log_env = match config.log_level.as_str() {
-            "TRACE" => Level::TRACE,
-            "DEBUG" => Level::DEBUG,
-            "INFO" => Level::INFO,
-            "WARN" => Level::WARN,
-            "ERROR" => Level::ERROR,
-            _ => Level::INFO,
-        };
 
         let format = get_log_format();
 
@@ -45,7 +28,7 @@ impl Logger {
         let (std_non_blocking, stdout_guard) = tracing_appender::non_blocking(std::io::stdout());
 
         let logger = Registry::default()
-            .with(EnvFilter::from_default_env().add_directive(log_env.into()))
+            .with(EnvFilter::new(&config.log_level))
             .with(
                 fmt::Layer::default()
                     .with_writer(std_non_blocking)

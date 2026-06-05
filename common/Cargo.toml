@@ -4,9 +4,17 @@ edition.workspace = true
 publish.workspace = true
 version.workspace = true
 
+[features]
+default = []
+openapi = ["utoipa"]
+
 [dependencies]
 axum = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 validator = { workspace = true, features = ["derive"] }
 mime = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+utoipa = { workspace = true, features = ["macros"], optional = true }

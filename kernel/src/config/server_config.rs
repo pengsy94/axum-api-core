@@ -22,6 +22,10 @@ pub struct ServerConfig {
     pub log_file: String,
     /// 允许操作日志输出
     pub log_enable_oper_log: bool,
+    /// 是否启用限流
+    pub rate_limit_enabled: bool,
+    /// CORS 允许的来源（逗号分隔，"*" 表示允许所有）
+    pub cors_allowed_origins: String,
 }
 
 impl ServerConfig {
@@ -43,9 +47,7 @@ impl ServerConfig {
             .map_err(|e| ConfigError::InvalidValue("SERVER_PORT".to_string(), e.to_string()))?;
 
         let log_level = env::var("LOG_LEVEL")
-            .unwrap_or_else(|_| "DEBUG".to_string())
-            .parse::<String>()
-            .map_err(|_| ConfigError::MissingEnvVar("LOG_LEVEL".to_string()))?;
+            .unwrap_or_else(|_| "DEBUG".to_string());
 
         let content_gzip = env::var("SERVER_CONTENT_GZIP")
             .unwrap_or_else(|_| "true".to_string())
@@ -63,24 +65,26 @@ impl ServerConfig {
             .map_err(|_| ConfigError::MissingEnvVar("SERVER_WS_OPEN".to_string()))?;
 
         let ws_path = env::var("SERVER_WS_PATH")
-            .unwrap_or_else(|_| "/ws".to_string())
-            .parse::<String>()
-            .map_err(|_| ConfigError::MissingEnvVar("SERVER_WS_PATH".to_string()))?;
+            .unwrap_or_else(|_| "/ws".to_string());
 
         let log_dir = env::var("LOG_DIR")
-            .unwrap_or_else(|_| "logs".to_string())
-            .parse::<String>()
-            .map_err(|_| ConfigError::MissingEnvVar("LOG_DIR".to_string()))?;
+            .unwrap_or_else(|_| "logs".to_string());
 
         let log_file = env::var("LOG_FILE")
-            .unwrap_or_else(|_| "axum_log".to_string())
-            .parse::<String>()
-            .map_err(|_| ConfigError::MissingEnvVar("LOG_FILE".to_string()))?;
+            .unwrap_or_else(|_| "axum_log".to_string());
 
         let log_enable_oper_log = env::var("LOG_ENABLE_OPER_LOG")
             .unwrap_or_else(|_| "true".to_string())
             .parse::<bool>()
             .map_err(|_| ConfigError::MissingEnvVar("LOG_ENABLE_OPER_LOG".to_string()))?;
+
+        let rate_limit_enabled = env::var("SERVER_RATE_LIMIT_ENABLED")
+            .unwrap_or_else(|_| "true".to_string())
+            .parse::<bool>()
+            .map_err(|e| ConfigError::InvalidValue("SERVER_RATE_LIMIT_ENABLED".to_string(), e.to_string()))?;
+
+        let cors_allowed_origins = env::var("CORS_ALLOWED_ORIGINS")
+            .unwrap_or_else(|_| "*".to_string());
 
         Ok(Self {
             debug,
@@ -94,6 +98,22 @@ impl ServerConfig {
             log_dir,
             log_file,
             log_enable_oper_log,
+            rate_limit_enabled,
+            cors_allowed_origins,
         })
+    }
+
+    /// 校验配置值合法性
+    pub fn validate(&self) -> Result<(), ConfigError> {
+        // 校验日志级别
+        let valid_levels = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR"];
+        if !valid_levels.contains(&self.log_level.to_uppercase().as_str()) {
+            return Err(ConfigError::ValidationError(format!(
+                "LOG_LEVEL 必须为 {:?} 之一，当前为: {}",
+                valid_levels, self.log_level
+            )));
+        }
+
+        Ok(())
     }
 }

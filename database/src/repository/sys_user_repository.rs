@@ -6,11 +6,11 @@ use crate::entity::sys_user;
 use crate::entity::sys_user::ActiveModel;
 use crate::get_db_unwrap;
 
-pub async fn get_by_id(user_id: &str) -> Result<sys_user::Model> {
+pub async fn get_by_id(user_id: i32) -> Result<sys_user::Model> {
     let db = get_db_unwrap();
     let user = sys_user::Entity::find()
         .filter(sys_user::Column::Id.eq(user_id))
-        .one(db)
+        .one(&*db)
         .await?;
 
     match user {
@@ -19,38 +19,39 @@ pub async fn get_by_id(user_id: &str) -> Result<sys_user::Model> {
     }
 }
 
-pub async fn insert() -> ActiveModel {
+pub async fn insert() -> Result<ActiveModel, anyhow::Error> {
     let db = get_db_unwrap();
-    let txn = db.begin().await.unwrap();
+    let txn = db.begin().await?;
 
     let user = ActiveModel {
         id: ActiveValue::NotSet,
         name: ActiveValue::Set(Some("李寻欢".to_owned())),
     }
     .save(&txn)
-    .await
-    .unwrap();
+    .await?;
 
-    txn.commit().await.unwrap();
+    txn.commit().await?;
 
-    user
+    Ok(user)
 }
 
-pub async fn delete_by_id() {
+pub async fn delete_by_id(id: i32) -> Result<u64, anyhow::Error> {
     let db = get_db_unwrap();
-    let res = sys_user::Entity::delete_by_id(3).exec(db).await.unwrap();
+    let res = sys_user::Entity::delete_by_id(id).exec(&*db).await?;
 
     println!("delete by id {:?} \r\n", res.rows_affected);
+    Ok(res.rows_affected)
 }
 
-pub async fn edit_by_id(user_id: &str) {
+pub async fn edit_by_id(user_id: i32) -> Result<(), anyhow::Error> {
     let db = get_db_unwrap();
 
-    let sys_user = get_by_id(user_id).await.unwrap();
+    let sys_user = get_by_id(user_id).await?;
 
     let mut active_model = sys_user.into_active_model();
     active_model.name = ActiveValue::Set(Some("修改后的用户名".to_owned()));
-    active_model.update(db).await.unwrap();
+    active_model.update(&*db).await?;
 
     println!("edit success!!");
+    Ok(())
 }

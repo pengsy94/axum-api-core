@@ -26,7 +26,7 @@ where
         Box::pin(async move {
             let Form(value) = Form::<T>::from_request(req, state).await.map_err(|e| {
                 return (
-                    StatusCode::OK,
+                    StatusCode::BAD_REQUEST,
                     Json(ErrorResponse {
                         code: 500,
                         message: "Form 参数解析失败".into(),
@@ -41,7 +41,7 @@ where
 
             if let Err(err) = value.validate() {
                 return Err((
-                    StatusCode::OK,
+                    StatusCode::BAD_REQUEST,
                     Json(ErrorResponse {
                         code: 500,
                         message: "Form 参数校验失败".into(),

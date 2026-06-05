@@ -1,6 +1,6 @@
 use axum::{middleware, Router};
 use axum::routing::{get, post};
-use middleware_fn::request::logging_middleware;
+use ::middleware::request::logging_middleware;
 use crate::api;
 
 pub mod args;
