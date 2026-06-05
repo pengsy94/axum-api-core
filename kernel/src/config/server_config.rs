@@ -22,10 +22,16 @@ pub struct ServerConfig {
     pub log_file: String,
     /// 允许操作日志输出
     pub log_enable_oper_log: bool,
+    /// 日志输出格式（text / json）
+    pub log_format: String,
     /// 是否启用限流
     pub rate_limit_enabled: bool,
     /// CORS 允许的来源（逗号分隔，"*" 表示允许所有）
     pub cors_allowed_origins: String,
+    /// JWT 签名密钥
+    pub jwt_secret: String,
+    /// 请求超时秒数（0 = 不超时）
+    pub request_timeout_seconds: u64,
 }
 
 impl ServerConfig {
@@ -78,6 +84,9 @@ impl ServerConfig {
             .parse::<bool>()
             .map_err(|_| ConfigError::MissingEnvVar("LOG_ENABLE_OPER_LOG".to_string()))?;
 
+        let log_format = env::var("LOG_FORMAT")
+            .unwrap_or_else(|_| "text".to_string());
+
         let rate_limit_enabled = env::var("SERVER_RATE_LIMIT_ENABLED")
             .unwrap_or_else(|_| "true".to_string())
             .parse::<bool>()
@@ -85,6 +94,14 @@ impl ServerConfig {
 
         let cors_allowed_origins = env::var("CORS_ALLOWED_ORIGINS")
             .unwrap_or_else(|_| "*".to_string());
+
+        let jwt_secret = env::var("JWT_SECRET")
+            .unwrap_or_else(|_| "change-me-to-a-random-secret".to_string());
+
+        let request_timeout_seconds = env::var("SERVER_REQUEST_TIMEOUT")
+            .unwrap_or_else(|_| "30".to_string())
+            .parse::<u64>()
+            .map_err(|e| ConfigError::InvalidValue("SERVER_REQUEST_TIMEOUT".to_string(), e.to_string()))?;
 
         Ok(Self {
             debug,
@@ -98,8 +115,11 @@ impl ServerConfig {
             log_dir,
             log_file,
             log_enable_oper_log,
+            log_format,
             rate_limit_enabled,
             cors_allowed_origins,
+            jwt_secret,
+            request_timeout_seconds,
         })
     }
 

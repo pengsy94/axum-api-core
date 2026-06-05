@@ -15,3 +15,5 @@ tokio = { workspace = true }
 serde_json = { workspace = true }
 uuid = { workspace = true, features = ["v4"] }
 common = { path = "../common" }
+kernel = { path = "../kernel" }
+metrics = { workspace = true }

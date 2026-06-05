@@ -1,0 +1,16 @@
+[package]
+name = "migration"
+edition.workspace = true
+publish.workspace = true
+version.workspace = true
+
+[dependencies]
+sea-orm-migration = { workspace = true }
+sea-orm = { workspace = true, features = ["sqlx-mysql", "macros", "runtime-tokio-native-tls", "with-chrono"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+
+[features]
+default = ["mysql"]
+mysql = ["sea-orm-migration/sqlx-mysql", "sea-orm/sqlx-mysql"]
+postgres = ["sea-orm-migration/sqlx-postgres", "sea-orm/sqlx-postgres"]
+sqlite = ["sea-orm-migration/sqlx-sqlite", "sea-orm/sqlx-sqlite"]

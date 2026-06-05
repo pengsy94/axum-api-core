@@ -73,6 +73,24 @@ pub async fn rate_limiter(request: Request, next: Next) -> Result<Response, Stat
     Ok(next.run(request).await)
 }
 
+/// Prometheus 请求指标中间件
+pub async fn metrics_middleware(request: Request, next: Next) -> Response {
+    let start = Instant::now();
+    let method = request.method().to_string();
+    let uri = request.uri().path().to_string();
+
+    let response = next.run(request).await;
+
+    let duration = start.elapsed().as_secs_f64();
+    let status = response.status().as_u16().to_string();
+
+    // 指标 label 需要 'static 生命周期
+    metrics::counter!("http_requests_total", "method" => method.clone(), "path" => uri.clone(), "status" => status.clone()).increment(1);
+    metrics::histogram!("http_request_duration_seconds", "method" => method, "path" => uri).record(duration);
+
+    response
+}
+
 /// 请求追踪 ID（可通过 `Extension` 在 handler 中取出）
 #[derive(Debug, Clone)]
 pub struct TraceId(pub String);

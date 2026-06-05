@@ -91,6 +91,23 @@ sea-orm-cli generate entity \
   -o database/src/entity
 ```
 
+## 🛠️ 脚手架
+
+通过模板快速生成 CRUD 代码，类似 Laravel Artisan：
+
+```bash
+# 创建 Controller（app/src/api/）
+bash scripts/make.sh controller Product
+
+# 创建 Model（Entity + Repository）
+bash scripts/make.sh model Category
+
+# 仅创建 Entity（database/src/entity/）
+bash scripts/make.sh entity Order
+```
+
+生成的文件包含完整的 CRUD 骨架和自动 `mod` 注册，按需修改即可。
+
 ## 🔌 WebSocket
 
 连接后返回 `client_id` 和在线人数：

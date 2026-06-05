@@ -1,6 +1,11 @@
 use app::route;
 use axum::Router;
 use axum::http::{HeaderValue, Method, StatusCode};
+use std::sync::OnceLock;
+use std::time::Duration;
+use tower_http::timeout::TimeoutLayer;
+
+static PROMETHEUS_HANDLE: OnceLock<metrics_exporter_prometheus::PrometheusHandle> = OnceLock::new();
 use axum::response::Json;
 use axum::routing::get;
 use database::DatabaseManager;
@@ -28,6 +33,12 @@ pub async fn make() -> anyhow::Result<(Router, TcpListener, SchedulerManager)> {
     if let Err(e) = DatabaseManager::init().await {
         tracing::warn!("数据库初始化失败（服务仍可运行）: {}", e);
     }
+    // 初始化 Prometheus 指标收集
+    let handle = metrics_exporter_prometheus::PrometheusBuilder::new()
+        .install_recorder()
+        .expect("Prometheus 初始化失败");
+    PROMETHEUS_HANDLE.set(handle).ok();
+
     // 打印系统信息
     kernel::system::show();
     // 创建调度器管理器
@@ -52,6 +63,15 @@ async fn build_application() -> anyhow::Result<(Router, TcpListener)> {
         false => app,
     };
 
+    // 请求超时中间件
+    let app = match config.request_timeout_seconds {
+        0 => app,
+        secs => app.layer(TimeoutLayer::with_status_code(StatusCode::REQUEST_TIMEOUT, Duration::from_secs(secs))),
+    };
+
+    // 添加 /metrics 端点
+    let app = app.route("/metrics", get(metrics_handler));
+
     // 添加cors跨越
     let make_service = app.layer(setup_cors());
 
@@ -62,6 +82,14 @@ async fn build_application() -> anyhow::Result<(Router, TcpListener)> {
     let addr = format!("{}:{}", config.host, config.port);
     let listener = TcpListener::bind(addr).await?;
     Ok((make_service, listener))
+}
+
+/// Prometheus 指标导出端点
+async fn metrics_handler() -> String {
+    PROMETHEUS_HANDLE
+        .get()
+        .map(|h| h.render())
+        .unwrap_or_else(|| "# metrics not initialized".to_string())
 }
 
 /// 就绪检查：验证服务是否就绪

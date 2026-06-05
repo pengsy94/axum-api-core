@@ -1,0 +1,50 @@
+use anyhow::{Result, anyhow};
+use sea_orm::{
+    ActiveModelTrait, ActiveValue, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter,
+};
+use crate::entity::{{snake_name}};
+use crate::entity::{{snake_name}}::ActiveModel;
+use crate::get_db_unwrap;
+
+// ========================================
+// {{Name}} Repository
+// 自动生成，按需修改
+// ========================================
+
+/// 根据 ID 查询
+pub async fn find_by_id(id: i32) -> Result<{{snake_name}}::Model> {
+    let db = get_db_unwrap();
+    let result = {{snake_name}}::Entity::find()
+        .filter({{snake_name}}::Column::Id.eq(id))
+        .one(&*db)
+        .await?;
+
+    result.ok_or_else(|| anyhow!("{{Name}} 不存在 (id={})", id))
+}
+
+/// 创建
+pub async fn create(name: &str) -> Result<{{snake_name}}::Model> {
+    let db = get_db_unwrap();
+
+    let active = ActiveModel {
+        id: ActiveValue::NotSet,
+        name: ActiveValue::Set(Some(name.to_owned())),
+    };
+
+    Ok(active.insert(&*db).await?)
+}
+
+/// 更新
+pub async fn update(id: i32, name: &str) -> Result<{{snake_name}}::Model> {
+    let db = get_db_unwrap();
+    let mut active = find_by_id(id).await?.into_active_model();
+    active.name = ActiveValue::Set(Some(name.to_owned()));
+    Ok(active.update(&*db).await?)
+}
+
+/// 删除
+pub async fn delete(id: i32) -> Result<u64> {
+    let db = get_db_unwrap();
+    let result = {{snake_name}}::Entity::delete_by_id(id).exec(&*db).await?;
+    Ok(result.rows_affected)
+}

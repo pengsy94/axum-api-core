@@ -13,10 +13,12 @@ database = { path = "../database" }
 axum = { workspace = true }
 anyhow = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros", "parking_lot", "signal"] }
-tower-http = { workspace = true, features = ["cors", "fs", "compression-gzip"] }  #compression-gzip
+tower-http = { workspace = true, features = ["cors", "fs", "compression-gzip", "timeout"] }  #compression-gzip
 chrono = { workspace = true }
 tracing = { workspace = true }
 time = { workspace = true }
 tracing-appender = { workspace = true }
-tracing-subscriber = { workspace = true, features = ["env-filter", "local-time"] }
+tracing-subscriber = { workspace = true, features = ["env-filter", "json", "local-time"] }
 serde_json = { workspace = true }
+metrics = { workspace = true }
+metrics-exporter-prometheus = { workspace = true }

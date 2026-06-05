@@ -19,7 +19,6 @@ impl Logger {
         let config = server_config();
 
         let format = get_log_format();
-
         // 文件输出
         let file_appender = tracing_appender::rolling::hourly(&config.log_dir, &config.log_file);
         let (non_blocking, file_guard) = tracing_appender::non_blocking(file_appender);
