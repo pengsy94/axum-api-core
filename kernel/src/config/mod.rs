@@ -2,8 +2,11 @@ mod database_config;
 pub mod error;
 mod server_config;
 
-use dotenvy::dotenv;
+use std::env;
 use std::sync::OnceLock;
+
+use dotenvy::{dotenv, from_filename};
+use tracing::info;
 
 use crate::config::{database_config::DatabaseConfig, server_config::ServerConfig};
 use error::ConfigError;
@@ -26,8 +29,20 @@ impl AppConfig {
             return Err(ConfigError::AlreadyInitialized);
         }
 
-        // 加载 .env 文件
-        dotenv().map_err(|e| ConfigError::EnvLoadFailed(e.to_string()))?;
+        // ===== 按环境加载 .env 文件 =====
+        // 优先级：已有环境变量 > .env.{APP_ENV} > .env
+        let app_env = env::var("APP_ENV").unwrap_or_default();
+
+        if !app_env.is_empty() {
+            let env_file = format!(".env.{}", app_env);
+            if let Err(e) = from_filename(&env_file) {
+                info!("未找到 {}，仅加载 .env（{})", env_file, e);
+            } else {
+                info!("已加载环境配置: {}", env_file);
+            }
+        }
+
+        dotenv().ok(); // .env 作为 fallback，不报错
 
         // 从环境变量创建配置
         let config = Self::from_env()?;

@@ -69,13 +69,19 @@ pub fn build_router() -> Router {
 }
 
 fn add_api_routes(router: Router) -> Router {
-    router
+    let mut router = router
         .route("/", get(index).post(index))
         .nest("/index", Router::new().route("/", get(index)))
         .nest(
             "/api",
             Router::new().route("/login", post(api::system::login)),
-        )
+        );
+
+    // 资源路由示例（debug 模式下可用）
+    #[cfg(debug_assertions)]
+    let router = resources!(router, "/api/users", api::user, [index, show, create, update, delete]);
+
+    router
 }
 
 async fn index() -> &'static str {
