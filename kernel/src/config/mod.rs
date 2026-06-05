@@ -1,5 +1,6 @@
 mod database_config;
 pub mod error;
+mod redis_config;
 mod server_config;
 
 use std::env;
@@ -8,13 +9,14 @@ use std::sync::OnceLock;
 use dotenvy::{dotenv, from_filename};
 use tracing::info;
 
-use crate::config::{database_config::DatabaseConfig, server_config::ServerConfig};
+use crate::config::{database_config::DatabaseConfig, redis_config::RedisConfig, server_config::ServerConfig};
 use error::ConfigError;
 
 /// 应用配置
 #[derive(Debug, Clone)]
 pub struct AppConfig {
     pub database: DatabaseConfig,
+    pub redis: RedisConfig,
     pub server: ServerConfig,
 }
 
@@ -57,12 +59,14 @@ impl AppConfig {
     fn from_env() -> Result<Self, ConfigError> {
         let server = ServerConfig::from_env()?;
         let database = DatabaseConfig::from_env()?;
+        let redis = RedisConfig::from_env()?;
 
         // 校验配置值
         server.validate()?;
         database.validate()?;
+        redis.validate()?;
 
-        Ok(Self { server, database })
+        Ok(Self { server, database, redis })
     }
 
     /// 获取全局配置（初始化后使用）
@@ -86,4 +90,9 @@ pub fn server_config() -> &'static ServerConfig {
 /// 便捷函数：获取数据库配置
 pub fn database_config() -> &'static DatabaseConfig {
     &AppConfig::global().database
+}
+
+/// 便捷函数：获取 Redis 配置
+pub fn redis_config() -> &'static RedisConfig {
+    &AppConfig::global().redis
 }

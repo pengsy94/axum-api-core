@@ -44,6 +44,7 @@ http = "1.4.0"
 validator = "0.20.0"
 mime = "0.3.17"
 utoipa = "5"
+redis = { version = "0.28", features = ["tokio-comp", "connection-manager"] }
 jsonwebtoken = "9"
 argon2 = "0.5"
 metrics = "0.24"

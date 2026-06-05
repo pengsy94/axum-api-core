@@ -11,6 +11,7 @@ anyhow = { workspace = true }
 sea-orm = { workspace = true, features = ["sqlx-mysql", "macros", "runtime-tokio-native-tls", "with-chrono"] }
 serde = { workspace = true, features = ["derive"] }
 tracing = { workspace = true }
+redis = { workspace = true }
 
 [features]
 default = ["postgres", "mysql", "sqlite"]

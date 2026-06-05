@@ -26,11 +26,14 @@ async fn main() -> anyhow::Result<()> {
 
             // 关闭数据库连接池
             database::DatabaseManager::close();
+
+            // 关闭 Redis 连接
+            database::RedisManager::close();
         }
     }
 
     println!(
-        "\n❌ Web服务已优雅关闭 [{}]\n",
+        "❌ Web服务已优雅关闭 [{}]\n",
         chrono::Local::now().format("%Y-%m-%d %H:%M:%S")
     );
 

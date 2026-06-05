@@ -1,5 +1,9 @@
 pub mod entity;
+pub mod redis;
 pub mod repository;
+
+pub use redis::RedisManager;
+pub use redis::get_redis;
 
 pub struct DatabaseManager;
 
@@ -50,7 +54,7 @@ impl DatabaseManager {
         let mut guard = DB_POOL.lock().unwrap();
         if guard.is_some() {
             guard.take();
-            tracing::info!("数据库连接池已关闭");
+            println!("❌ 数据库连接池已关闭");
         }
     }
 }

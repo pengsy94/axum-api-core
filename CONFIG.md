@@ -63,6 +63,15 @@ APP_ENV=production
 | `DATABASE_MIN_CONNECTIONS` | `u32` | `2` | 连接池最小连接数（空闲保留） |
 | `DATABASE_CONNECT_TIMEOUT` | `u32` | `30` | 连接超时时间（秒） |
 
+---
+
+## Redis 配置
+
+| 变量名 | 类型 | 默认值 | 说明 |
+|--------|------|--------|------|
+| `REDIS_URL` | `string` | ` ` | 连接字符串，留空即不启用（如 `redis://localhost:6379`） |
+| `REDIS_POOL_SIZE` | `u32` | `4` | 连接池大小 |
+
 ### 数据库 URL 格式
 
 ```

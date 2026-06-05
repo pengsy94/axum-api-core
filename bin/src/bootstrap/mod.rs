@@ -3,7 +3,7 @@ use axum::Router;
 use axum::http::{HeaderValue, Method, StatusCode};
 use axum::response::Json;
 use axum::routing::get;
-use database::DatabaseManager;
+use database::{DatabaseManager, RedisManager};
 use kernel::config::AppConfig;
 use kernel::config::server_config;
 use kernel::tasks::manager::SchedulerManager;
@@ -32,6 +32,10 @@ pub async fn make() -> anyhow::Result<(Router, TcpListener, SchedulerManager)> {
     // 初始化数据库信息
     if let Err(e) = DatabaseManager::init().await {
         tracing::warn!("数据库初始化失败（服务仍可运行）: {}", e);
+    }
+    // 初始化 Redis
+    if let Err(e) = RedisManager::init().await {
+        tracing::warn!("Redis 初始化失败（服务仍可运行）: {}", e);
     }
     // 初始化 Prometheus 指标收集
     let handle = metrics_exporter_prometheus::PrometheusBuilder::new()
@@ -96,26 +100,33 @@ async fn metrics_handler() -> String {
 
 /// 就绪检查：验证服务是否就绪
 async fn ready_check() -> (StatusCode, Json<serde_json::Value>) {
-    if kernel::config::database_config().enabled {
-        // 启用了数据库：检查连接池
+    let db_status = if kernel::config::database_config().enabled {
         if database::get_db().is_some() {
-            (
-                StatusCode::OK,
-                Json(json!({ "status": "ready", "database": "connected" })),
-            )
+            "connected"
         } else {
-            (
+            return (
                 StatusCode::SERVICE_UNAVAILABLE,
                 Json(json!({ "status": "not_ready", "database": "disconnected" })),
-            )
+            );
         }
     } else {
-        // 未启用数据库：仅检查服务存活
-        (
-            StatusCode::OK,
-            Json(json!({ "status": "ready", "database": "disabled" })),
-        )
-    }
+        "disabled"
+    };
+
+    let redis_status = if kernel::config::redis_config().enabled {
+        if database::get_redis().is_some() {
+            "connected"
+        } else {
+            "disconnected"
+        }
+    } else {
+        "disabled"
+    };
+
+    (
+        StatusCode::OK,
+        Json(json!({ "status": "ready", "database": db_status, "redis": redis_status })),
+    )
 }
 
 fn setup_cors() -> CorsLayer {
