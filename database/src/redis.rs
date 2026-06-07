@@ -32,7 +32,7 @@ impl RedisManager {
         let mut guard = REDIS_POOL.lock().unwrap();
         if guard.is_some() {
             guard.take();
-            tracing::info!("Redis 连接已关闭");
+            println!("✅ Redis 连接已关闭");
         }
     }
 }

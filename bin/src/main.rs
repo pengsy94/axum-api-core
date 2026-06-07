@@ -33,7 +33,7 @@ async fn main() -> anyhow::Result<()> {
     }
 
     println!(
-        "❌ Web服务已优雅关闭 [{}]\n",
+        "✅ Web服务已优雅关闭 [{}]\n",
         chrono::Local::now().format("%Y-%m-%d %H:%M:%S")
     );
 

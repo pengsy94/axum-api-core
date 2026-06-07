@@ -54,7 +54,7 @@ impl DatabaseManager {
         let mut guard = DB_POOL.lock().unwrap();
         if guard.is_some() {
             guard.take();
-            println!("❌ 数据库连接池已关闭");
+            println!("✅ 数据库连接池已关闭");
         }
     }
 }
