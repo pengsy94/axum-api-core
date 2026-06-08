@@ -4,3 +4,4 @@
 .env
 /logs
 .DS_Store
+.reasonix
