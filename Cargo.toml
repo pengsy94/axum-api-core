@@ -2,6 +2,7 @@
 members = [
     "app",
     "bin",
+    "bin/artisan",
     "common",
     "kernel",
     "database",
@@ -21,6 +22,7 @@ version = "0.1.0"
 [workspace.dependencies]
 axum = "0.8.8"
 anyhow = "1.0.100"
+clap = { version = "4", features = ["derive"] }
 dotenvy = "0.15.7"
 num_cpus = "1.17.0"
 serde = "1.0.228"

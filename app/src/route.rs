@@ -1,4 +1,5 @@
 use crate::api;
+use crate::controller_routes;
 use std::sync::Arc;
 
 use axum::http::StatusCode;
@@ -77,9 +78,23 @@ fn add_api_routes(router: Router) -> Router {
             Router::new().route("/login", post(api::system::login)),
         );
 
-    // 资源路由示例（debug 模式下可用）
+    // === Laravel 风格 Controller 路由 ===
+    // 使用 controller_routes! 宏注册 RESTful 资源路由
+    // 类似 Laravel: Route::apiResource('users', UserController::class)
     #[cfg(debug_assertions)]
-    let router = resources!(router, "/api/users", api::user, [index, show, create, update, delete]);
+    {
+        use crate::controllers::user_controller::UserController;
+        router = controller_routes!(
+            router,
+            "/api/users",
+            UserController,
+            [index, show, create, update, delete]
+        );
+    }
+
+    // === 旧版 resources! 宏（向后兼容） ===
+    // #[cfg(debug_assertions)]
+    // let router = resources!(router, "/api/users", api::user, [index, show, create, update, delete]);
 
     router
 }

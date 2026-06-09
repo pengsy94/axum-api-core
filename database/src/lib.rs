@@ -1,4 +1,5 @@
 pub mod entity;
+pub mod model;
 pub mod redis;
 pub mod repository;
 

@@ -10,10 +10,12 @@ openapi = ["utoipa", "common/openapi"]
 
 [dependencies]
 common = { path = "../common" }
+database = { path = "../database" }
 kernel = { path = "../kernel" }
 middleware = { path = "../middleware" }
 
 axum = { workspace = true, features = ["multipart", "ws"] }
+sea-orm = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 tokio = { workspace = true }
 tracing = { workspace = true }

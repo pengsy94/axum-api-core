@@ -111,9 +111,11 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "common",
+ "database",
  "futures-util",
  "kernel",
  "middleware",
+ "sea-orm",
  "serde",
  "serde_json",
  "tokio",
@@ -149,6 +151,15 @@ name = "arrayvec"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
+
+[[package]]
+name = "artisan"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "async-compression"
@@ -783,6 +794,8 @@ name = "database"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "chrono",
+ "common",
  "kernel",
  "redis",
  "sea-orm",
