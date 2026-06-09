@@ -2,7 +2,7 @@
 members = [
     "app",
     "bin",
-    "bin/artisan",
+    "artisan",
     "common",
     "kernel",
     "database",

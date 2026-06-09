@@ -59,7 +59,7 @@ curl http://localhost:3000
 
 ```
 bin/                入口，只组装不实现
-bin/artisan/        Artisan CLI（cargo run -p artisan make:controller ...）
+artisan/            Artisan CLI（cargo run -p artisan make:controller ...）
 app/                路由注册 + Controller + Service + 宏
   src/route.rs           全局路由定义（中间件/健康检查/404）
   src/controllers/       Laravel 风格 Controller（user_controller.rs）

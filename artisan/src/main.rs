@@ -77,10 +77,8 @@ fn to_snake(name: &str) -> String {
 }
 
 fn workspace_root() -> PathBuf {
-    // 从 bin/artisan/ 向上两级到 workspace root
+    // 从 artisan/ 向上一级到 workspace root
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .parent()
-        .unwrap()
         .parent()
         .unwrap()
         .to_path_buf()
