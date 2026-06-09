@@ -6,7 +6,7 @@ GET http://127.0.0.1:3000/api/test
 ### POST 请求为json的时候,参数处理
 # @no-log
 # @no-redirect
-POST http://127.0.0.1:3000/api/test/post-json
+POST http://127.0.0.1:5000/test/post-json
 content-type: application/json;charset=UTF-8
 
 {

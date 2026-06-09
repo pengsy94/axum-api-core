@@ -1819,6 +1819,7 @@ dependencies = [
  "axum",
  "common",
  "http",
+ "http-body-util",
  "kernel",
  "metrics",
  "serde_json",

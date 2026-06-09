@@ -15,15 +15,13 @@ pub struct Logger {
 
 impl Logger {
     pub fn init() -> anyhow::Result<Self> {
-        // 获取配置
         let config = server_config();
 
         let format = get_log_format();
-        // 文件输出
+
         let file_appender = tracing_appender::rolling::hourly(&config.log_dir, &config.log_file);
         let (non_blocking, file_guard) = tracing_appender::non_blocking(file_appender);
 
-        // 标准控制台输出
         let (std_non_blocking, stdout_guard) = tracing_appender::non_blocking(std::io::stdout());
 
         let logger = Registry::default()
@@ -52,15 +50,10 @@ impl Logger {
 #[cfg(target_os = "windows")]
 fn get_log_format() -> Format<Compact, LocalTime<Rfc3339>> {
     fmt::format()
-        .with_level(true) // don't include levels in formatted output
-        .with_target(true) // don't include targets
+        .with_level(true)
+        .with_target(true)
         .with_thread_ids(true)
-        // include the thread ID of the current thread
-        // .with_thread_names(true)
-        // .with_file(true)
-        // .with_ansi(true)
-        // .with_line_number(true) // include the name of the current thread
-        .with_timer(LocalTime::rfc_3339()) // use RFC 3339 timestamps
+        .with_timer(LocalTime::rfc_3339())
         .compact()
 }
 #[cfg(not(target_os = "windows"))]

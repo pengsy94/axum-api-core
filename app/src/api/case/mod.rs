@@ -1,6 +1,5 @@
-use axum::{middleware, Router};
+use axum::Router;
 use axum::routing::{get, post};
-use ::middleware::request::logging_middleware;
 use crate::api;
 
 pub mod args;
@@ -19,6 +18,4 @@ pub fn set_test_api() -> Router {
         .route("/post-json", post(api::case::args::sys_query_json))
         // post form提交参数
         .route("/post-form", post(api::case::args::sys_query_form))
-        // 整个组添加 中间件案例
-        .layer(middleware::from_fn(logging_middleware))
 }
