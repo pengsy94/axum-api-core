@@ -196,4 +196,4 @@ cargo run -p migration up                # 运行数据库迁移
 
 ## 📄 License
 
-MIT
+本项目基于 [MIT License](LICENSE) 开源。
