@@ -6,6 +6,7 @@
 
 ## 🔴 硬规则 [CRITICAL]
 
+- **回复的时候，尊称我为 总舵主。**
 - **默认使用中文沟通、说明和评审。**
 - 修改代码前，先给出可选方案并等待确认。
 - 未经确认，不进行实质性代码写入、删除、迁移、重构。
@@ -25,7 +26,7 @@ bin/                         入口，只组装不实现
   src/main.rs                启动入口，信号处理 + 优雅关闭
   src/bootstrap/             启动编排（配置→路由→DB→调度器→系统信息）
 
-bin/artisan/                 Artisan CLI（cargo run -p artisan）
+artisan/                     Artisan CLI（cargo run -p artisan）
   src/main.rs                命令行入口，make:controller / make:service / make:resource / make:model
 
 app/                         路由注册 + Controller + Service
