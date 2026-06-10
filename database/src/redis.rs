@@ -11,7 +11,7 @@ impl RedisManager {
     pub async fn init() -> Result<(), String> {
         let config = redis_config();
         if !config.enabled {
-            println!("✺ 未配置 REDIS_URL，跳过 Redis 初始化");
+            println!("✺ the REDIS_URL is not configured; Redis initialization is skipped.");
             return Ok(());
         }
         let client =
@@ -20,7 +20,7 @@ impl RedisManager {
             .await
             .map_err(|e| format!("Redis 连接失败: {}", e))?;
         *REDIS_POOL.lock().unwrap() = Some(Arc::new(conn));
-        println!("✅ Redis 连接已建立");
+        println!("✅ Redis connection pool initialized successfully!");
         Ok(())
     }
 
@@ -46,7 +46,7 @@ impl RedisManager {
         let mut guard = REDIS_POOL.lock().unwrap();
         if guard.is_some() {
             guard.take();
-            println!("📌 Redis 连接已关闭");
+            println!("📌 the Redis connection pool has been closed.");
         }
     }
 }

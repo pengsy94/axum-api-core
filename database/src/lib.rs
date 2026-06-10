@@ -24,7 +24,7 @@ impl DatabaseManager {
 
         // 未配置数据库时跳过初始化
         if !config.enabled {
-            println!("✺ 未配置 DATABASE_URL，跳过数据库初始化");
+            println!("✺ the DATABASE_URL is not configured; skipping database initialization.");
             return Ok(());
         }
 
@@ -37,7 +37,7 @@ impl DatabaseManager {
 
         let connection = Database::connect(opt).await?;
         *DB_POOL.lock().unwrap() = Some(Arc::new(connection));
-        println!("✅ 数据库连接池连接已建立");
+        println!("✅ Database connection pool initialized successfully!");
         Ok(())
     }
 
@@ -64,7 +64,7 @@ impl DatabaseManager {
         let mut guard = DB_POOL.lock().unwrap();
         if guard.is_some() {
             guard.take();
-            println!("📌 数据库连接池已关闭");
+            println!("📌 the Database connection pool has been closed.");
         }
     }
 }
