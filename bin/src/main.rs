@@ -4,11 +4,10 @@ mod bootstrap;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    let _bootstrap_logger = logger::Logger::init()?;
+
     // 服务应用初始化
     let (make_service, listener, scheduler_manager) = bootstrap::make().await?;
-
-    // 日志服务初始化(接收)
-    let _logger = logger::Logger::init();
 
     tokio::select! {
         server_result =  axum::serve(listener, make_service) => {
@@ -18,7 +17,7 @@ async fn main() -> anyhow::Result<()> {
             }
         }
         _ = tokio::signal::ctrl_c() => {
-            println!("\n🕞 接收到 Ctrl+C 信号，正在优雅关闭...");
+            println!("\n🕞 接收到 Ctrl+C 信号，正在优雅关闭...\n");
 
             // 关闭调度器
             let shutdown_future = scheduler_manager.shutdown_future();
@@ -32,8 +31,9 @@ async fn main() -> anyhow::Result<()> {
         }
     }
 
+    println!();
     println!(
-        "✅ Web服务已优雅关闭 [{}]\n",
+        "🔴 Axum 服务已优雅关闭 [{}]\n",
         chrono::Local::now().format("%Y-%m-%d %H:%M:%S")
     );
 

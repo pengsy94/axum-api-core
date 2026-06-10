@@ -1,11 +1,10 @@
-use crate::utils::response::{ErrorResponse, FieldError};
+use crate::utils::response::{ApiResponse, FieldError};
 use crate::validator::validation_errors_to_fields;
 
 use axum::{
-    extract::{FromRequest, Request}, http::StatusCode,
+    extract::{FromRequest, Request},
     response::{IntoResponse, Response},
     Form,
-    Json,
 };
 use serde::de::DeserializeOwned;
 use validator::Validate;
@@ -25,30 +24,24 @@ where
     ) -> impl Future<Output = Result<Self, Self::Rejection>> + Send {
         Box::pin(async move {
             let Form(value) = Form::<T>::from_request(req, state).await.map_err(|e| {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    Json(ErrorResponse {
-                        code: 500,
-                        message: "Form 参数解析失败".into(),
-                        errors: Some(vec![FieldError {
-                            field: "Form".into(),
-                            message: e.to_string(),
-                        }]),
-                    }),
+                ApiResponse::<()>::error_with_errors(
+                    400,
+                    "Form 参数解析失败",
+                    vec![FieldError {
+                        field: "form".into(),
+                        message: e.to_string(),
+                    }],
                 )
-                    .into_response();
+                .into_response()
             })?;
 
             if let Err(err) = value.validate() {
-                return Err((
-                    StatusCode::BAD_REQUEST,
-                    Json(ErrorResponse {
-                        code: 500,
-                        message: "Form 参数校验失败".into(),
-                        errors: Some(validation_errors_to_fields(err)),
-                    }),
+                return Err(ApiResponse::<()>::error_with_errors(
+                    400,
+                    "Form 参数校验失败",
+                    validation_errors_to_fields(err),
                 )
-                    .into_response());
+                .into_response());
             };
 
             Ok(ValidatedForm(value))

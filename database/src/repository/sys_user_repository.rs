@@ -39,7 +39,7 @@ pub async fn delete_by_id(id: i32) -> Result<u64, anyhow::Error> {
     let db = get_db_unwrap();
     let res = sys_user::Entity::delete_by_id(id).exec(&*db).await?;
 
-    println!("delete by id {:?} \r\n", res.rows_affected);
+    tracing::info!(rows_affected = res.rows_affected, "delete by id");
     Ok(res.rows_affected)
 }
 
@@ -52,6 +52,6 @@ pub async fn edit_by_id(user_id: i32) -> Result<(), anyhow::Error> {
     active_model.name = ActiveValue::Set(Some("修改后的用户名".to_owned()));
     active_model.update(&*db).await?;
 
-    println!("edit success!!");
+    tracing::info!(user_id, "edit success");
     Ok(())
 }

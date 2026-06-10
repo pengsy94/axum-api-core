@@ -100,7 +100,16 @@ where
         T: Into<<E::PrimaryKey as PrimaryKeyTrait>::ValueType> + Send,
     {
         let db = get_conn()?;
-        E::delete_by_id(id).exec(&*db).await.map_err(|e| AppError::internal(e.to_string()))
+        let result = E::delete_by_id(id)
+            .exec(&*db)
+            .await
+            .map_err(|e| AppError::internal(e.to_string()))?;
+
+        if result.rows_affected == 0 {
+            return Err(AppError::not_found("记录不存在"));
+        }
+
+        Ok(result)
     }
 }
 

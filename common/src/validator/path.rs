@@ -1,10 +1,9 @@
-use crate::utils::response::{ErrorResponse, FieldError};
+use crate::utils::response::{ApiResponse, FieldError};
 use crate::validator::validation_errors_to_fields;
 
 use axum::{
-    Json,
     extract::{FromRequestParts, Path},
-    http::{StatusCode, request::Parts},
+    http::request::Parts,
     response::{IntoResponse, Response},
 };
 use serde::de::DeserializeOwned;
@@ -27,30 +26,24 @@ where
             let Path(value) = Path::<T>::from_request_parts(parts, state)
                 .await
                 .map_err(|e| {
-                    return (
-                        StatusCode::BAD_REQUEST,
-                        Json(ErrorResponse {
-                            code: 500,
-                            message: "Path 参数解析失败".into(),
-                            errors: Some(vec![FieldError {
-                                field: "Path".into(),
-                                message: e.to_string(),
-                            }]),
-                        }),
+                    ApiResponse::<()>::error_with_errors(
+                        400,
+                        "Path 参数解析失败",
+                        vec![FieldError {
+                            field: "path".into(),
+                            message: e.to_string(),
+                        }],
                     )
-                        .into_response();
+                    .into_response()
                 })?;
 
             if let Err(err) = value.validate() {
-                return Err((
-                    StatusCode::BAD_REQUEST,
-                    Json(ErrorResponse {
-                        code: 500,
-                        message: "Path 参数校验失败".into(),
-                        errors: Some(validation_errors_to_fields(err)),
-                    }),
+                return Err(ApiResponse::<()>::error_with_errors(
+                    400,
+                    "Path 参数校验失败",
+                    validation_errors_to_fields(err),
                 )
-                    .into_response());
+                .into_response());
             };
 
             Ok(ValidatedPath(value))

@@ -7,9 +7,6 @@ pub fn show() {
 
     let config = server_config();
 
-    println!("{:>2} Axum 服务启动成功!!!", "🎉🎉🎉");
-    println!();
-
     #[cfg(target_os = "windows")]
     let system_name = env::var("OS").unwrap().to_string();
     #[cfg(not(target_os = "windows"))]

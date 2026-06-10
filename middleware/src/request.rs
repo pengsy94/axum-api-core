@@ -1,11 +1,10 @@
 use axum::{
-    body::Body,
     extract::{OriginalUri, Request},
     http::{HeaderMap, StatusCode},
     middleware::Next,
     response::Response,
 };
-use http_body_util::BodyExt;
+use common::utils::response::ResJsonString;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -77,27 +76,23 @@ pub async fn logging_middleware(
 
     let response = next.run(request).await;
     let duration = start.elapsed();
+    let status = response.status();
 
-    let (parts, body) = response.into_parts();
-    let collected = body.collect().await.unwrap_or_default();
-    let body_bytes = collected.to_bytes();
-    let body_str = String::from_utf8_lossy(&body_bytes);
-    let log_body = if body_bytes.len() > MAX_BODY_LOG_BYTES {
-        let truncated: String = body_str.chars().take(MAX_BODY_LOG_BYTES).collect();
-        format!("{}... ({} bytes, truncated)", truncated, body_bytes.len())
-    } else {
-        body_str.to_string()
-    };
+    let log_body = response
+        .extensions()
+        .get::<ResJsonString>()
+        .map(|body| truncate_log_body(&body.0))
+        .unwrap_or_else(|| "<streaming-or-non-json-body>".to_string());
 
     info!(
         "← {} {} ({})  |  body: {}",
-        parts.status.as_u16(),
-        parts.status.canonical_reason().unwrap_or(""),
+        status.as_u16(),
+        status.canonical_reason().unwrap_or(""),
         fmt_dur(duration),
         log_body
     );
 
-    Response::from_parts(parts, Body::from(body_bytes))
+    response
 }
 
 /// 限流中间件
@@ -157,4 +152,13 @@ pub async fn trace_middleware(mut request: Request, next: Next) -> Response {
     );
 
     response
+}
+
+fn truncate_log_body(body: &str) -> String {
+    if body.len() > MAX_BODY_LOG_BYTES {
+        let truncated: String = body.chars().take(MAX_BODY_LOG_BYTES).collect();
+        format!("{}... ({} bytes, truncated)", truncated, body.len())
+    } else {
+        body.to_string()
+    }
 }

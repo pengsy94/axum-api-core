@@ -56,8 +56,12 @@ fn main() {
     };
 
     match result {
-        Ok(msg) => println!("✅ {}", msg),
-        Err(e) => eprintln!("❌ {}", e),
+        Ok(msg) => {
+            println!("✅ {}", msg);
+        }
+        Err(e) => {
+            eprintln!("❌ {}", e);
+        }
     }
 }
 
@@ -103,6 +107,7 @@ fn make_controller(name: &str) -> Result<String, String> {
         r#"//! {name} 控制器
 
 use axum::extract::Path;
+use common::error::AppError;
 use common::resources::JsonResource;
 use common::utils::response::ApiResponse;
 use database::entity::sys_{snake};
@@ -138,55 +143,42 @@ impl JsonResource for {name}Resource {{
 // {name}Controller
 // ========================================
 
-pub struct {name}Controller {{
-    service: {name}Service,
-}}
+    pub struct {name}Controller;
 
-impl {name}Controller {{
-    pub fn new() -> Self {{
-        Self {{ service: {name}Service::new() }}
+    impl Controller for {name}Controller {{
+        fn name() -> &'static str {{ "{name}Controller" }}
     }}
-}}
-
-impl Controller for {name}Controller {{
-    fn name() -> &'static str {{ "{name}Controller" }}
-}}
 
 impl {name}Controller {{
     /// GET /api/{snake}
-    pub async fn index() -> ApiResponse<serde_json::Value> {{
-        let service = {name}Service::new();
+    pub async fn index() -> Result<ApiResponse<serde_json::Value>, AppError> {{
         // TODO: service.list(&params).await
-        ApiResponse::success(json!({{ "message": "TODO" }}))
+        Ok(ApiResponse::success(json!({{ "message": "TODO" }})))
     }}
 
     /// GET /api/{snake}/{{id}}
-    pub async fn show(Path(id): Path<i32>) -> ApiResponse<serde_json::Value> {{
+    pub async fn show(Path(id): Path<i32>) -> Result<ApiResponse<serde_json::Value>, AppError> {{
         let service = {name}Service::new();
-        match service.show(id).await {{
-            Ok(Some(data)) => {name}Resource::make(data).respond(),
-            Ok(None) => ApiResponse::error(404, "记录不存在"),
-            Err(e) => ApiResponse::error(500, &e.to_string()),
-        }}
+        let data = service.show(id).await?
+            .ok_or_else(|| AppError::not_found("记录不存在"))?;
+        Ok({name}Resource::make(data).respond())
     }}
 
     /// POST /api/{snake}
-    pub async fn create() -> ApiResponse<serde_json::Value> {{
-        ApiResponse::success(json!({{ "message": "TODO" }}))
+    pub async fn create() -> Result<ApiResponse<serde_json::Value>, AppError> {{
+        Ok(ApiResponse::success(json!({{ "message": "TODO" }})))
     }}
 
     /// PUT /api/{snake}/{{id}}
-    pub async fn update(Path(id): Path<i32>) -> ApiResponse<serde_json::Value> {{
-        ApiResponse::success(json!({{ "message": "TODO" }}))
+    pub async fn update(Path(id): Path<i32>) -> Result<ApiResponse<serde_json::Value>, AppError> {{
+        Ok(ApiResponse::success(json!({{ "message": "TODO" }})))
     }}
 
     /// DELETE /api/{snake}/{{id}}
-    pub async fn delete(Path(id): Path<i32>) -> ApiResponse<serde_json::Value> {{
+    pub async fn delete(Path(id): Path<i32>) -> Result<ApiResponse<serde_json::Value>, AppError> {{
         let service = {name}Service::new();
-        match service.destroy(id).await {{
-            Ok(()) => ApiResponse::success(json!({{ "deleted": true }})),
-            Err(e) => ApiResponse::error(500, &e.to_string()),
-        }}
+        service.destroy(id).await?;
+        Ok(ApiResponse::success(json!({{ "deleted": true }})))
     }}
 }}
 "#,

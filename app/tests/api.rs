@@ -112,6 +112,7 @@ async fn test_login_with_invalid_password() {
         )
         .await
         .unwrap();
+    assert_eq!(res.status(), StatusCode::OK);
     let json: Value = serde_json::from_slice(
         &axum::body::to_bytes(res.into_body(), 8192).await.unwrap(),
     )
@@ -137,9 +138,48 @@ async fn test_login_with_wrong_email() {
         )
         .await
         .unwrap();
+    assert_eq!(res.status(), StatusCode::OK);
     let json: Value = serde_json::from_slice(
         &axum::body::to_bytes(res.into_body(), 8192).await.unwrap(),
     )
     .unwrap();
     assert_eq!(json["code"], 401);
+}
+
+#[tokio::test]
+async fn test_user_routes_registered_in_test_build() {
+    let app = build_app();
+    let res = app
+        .oneshot(
+            Request::builder()
+                .uri("/api/users?page=1&page_size=20")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_ne!(res.status(), StatusCode::NOT_FOUND);
+}
+
+#[tokio::test]
+async fn test_query_validation_returns_http_200_and_body_code_400() {
+    let app = build_app();
+    let res = app
+        .oneshot(
+            Request::builder()
+                .uri("/api/users?page=0&page_size=20")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(res.status(), StatusCode::OK);
+    let json: Value = serde_json::from_slice(
+        &axum::body::to_bytes(res.into_body(), 8192).await.unwrap(),
+    )
+    .unwrap();
+    assert_eq!(json["code"], 400);
+    assert_eq!(json["message"], "Query 参数校验失败");
 }

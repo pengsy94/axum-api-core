@@ -26,7 +26,13 @@ static PROMETHEUS_HANDLE: OnceLock<metrics_exporter_prometheus::PrometheusHandle
 
 pub async fn make() -> anyhow::Result<(Router, TcpListener, SchedulerManager)> {
     // 初始化配置（只调用一次）
-    AppConfig::init()?;
+    if AppConfig::try_global().is_none() {
+        AppConfig::init()?;
+    }
+
+    // 打印系统信息
+    kernel::system::show();
+
     // 构建应用
     let (make_service, listener) = build_application().await?;
     // 初始化数据库信息
@@ -43,12 +49,16 @@ pub async fn make() -> anyhow::Result<(Router, TcpListener, SchedulerManager)> {
         .expect("Prometheus 初始化失败");
     PROMETHEUS_HANDLE.set(handle).ok();
 
-    // 打印系统信息
-    kernel::system::show();
     // 创建调度器管理器
     let scheduler_manager = SchedulerManager::new();
     // 启动定时任务
-    scheduler_manager.start().await.unwrap();
+    if let Err(e) = scheduler_manager.start().await {
+        tracing::warn!(error = %e, "cron 定时任务启动失败，服务继续运行");
+    }
+
+    println!();
+    println!("{:>2} Axum 服务启动成功!!!", "🎉🎉🎉");
+    println!();
 
     Ok((make_service, listener, scheduler_manager))
 }
@@ -101,7 +111,7 @@ async fn metrics_handler() -> String {
 /// 就绪检查：验证服务是否就绪
 async fn ready_check() -> (StatusCode, Json<serde_json::Value>) {
     let db_status = if kernel::config::database_config().enabled {
-        if database::get_db().is_some() {
+        if DatabaseManager::ping().await {
             "connected"
         } else {
             return (
@@ -114,7 +124,7 @@ async fn ready_check() -> (StatusCode, Json<serde_json::Value>) {
     };
 
     let redis_status = if kernel::config::redis_config().enabled {
-        if database::get_redis().is_some() {
+        if RedisManager::ping().await {
             "connected"
         } else {
             "disconnected"
@@ -131,7 +141,14 @@ async fn ready_check() -> (StatusCode, Json<serde_json::Value>) {
 
 fn setup_cors() -> CorsLayer {
     let config = server_config();
-    let methods = vec![Method::GET, Method::POST, Method::HEAD, Method::OPTIONS];
+    let methods = vec![
+        Method::GET,
+        Method::POST,
+        Method::PUT,
+        Method::DELETE,
+        Method::HEAD,
+        Method::OPTIONS,
+    ];
 
     if config.cors_allowed_origins == "*" {
         CorsLayer::new()

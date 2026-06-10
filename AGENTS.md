@@ -108,6 +108,8 @@ migration/                   数据库迁移（SeaORM Migration）
 | `Conflict(msg)` | 409 | 冲突 |
 | `Internal(msg)` | 500 | 内部错误 |
 
+- 新增约定：Controller/handler 优先返回 `Result<_, AppError>`，由 `IntoResponse` 统一落标准错误响应；不要手工把业务错误改写成 `ApiResponse::error(500, ...)`
+
 ### 3. 分层调用链（Laravel 风格）
 
 ```

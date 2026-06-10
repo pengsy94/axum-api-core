@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use tokio_cron_scheduler::JobScheduler;
-use tracing::error;
+use tracing::{error, warn};
 use crate::config::server_config;
 use crate::tasks::task_one;
 
@@ -31,8 +31,7 @@ impl SchedulerManager {
             // 保存调度器实例
             *scheduler_lock = Some(sched);
 
-            println!("{} cron 定时任务调度器已启动成功!!!", "✅");
-            println!();
+            tracing::info!("cron 定时任务调度器已启动成功");
         }
         Ok(())
     }
@@ -53,13 +52,13 @@ impl SchedulerManager {
 
         if let Some(mut sched) = scheduler_lock.take() {
             sched.shutdown().await?;
-            println!(
-                "\n❌ cron定时任务调度器已关闭 [{}]",
-                chrono::Local::now().format("%Y-%m-%d %H:%M:%S")
+            tracing::info!(
+                closed_at = %chrono::Local::now().format("%Y-%m-%d %H:%M:%S"),
+                "cron 定时任务调度器已关闭"
             );
         } else {
             if server_config().cron {
-                error!("调度器实例不存在");
+                warn!("调度器未启动，跳过关闭");
             }
         }
 

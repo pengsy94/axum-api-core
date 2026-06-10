@@ -24,7 +24,7 @@ impl DatabaseManager {
 
         // 未配置数据库时跳过初始化
         if !config.enabled {
-            tracing::info!("未配置 DATABASE_URL，跳过数据库初始化");
+            println!("✺ 未配置 DATABASE_URL，跳过数据库初始化");
             return Ok(());
         }
 
@@ -37,6 +37,7 @@ impl DatabaseManager {
 
         let connection = Database::connect(opt).await?;
         *DB_POOL.lock().unwrap() = Some(Arc::new(connection));
+        println!("✅ 数据库连接池连接已建立");
         Ok(())
     }
 
@@ -50,12 +51,20 @@ impl DatabaseManager {
         DB_POOL.lock().unwrap().clone().expect("Database not initialized")
     }
 
+    /// 检查数据库连接是否存活
+    pub async fn ping() -> bool {
+        match Self::get() {
+            Some(db) => db.ping().await.is_ok(),
+            None => false,
+        }
+    }
+
     /// 关闭数据库连接池（优雅关闭时调用）
     pub fn close() {
         let mut guard = DB_POOL.lock().unwrap();
         if guard.is_some() {
             guard.take();
-            println!("✅ 数据库连接池已关闭");
+            println!("📌 数据库连接池已关闭");
         }
     }
 }

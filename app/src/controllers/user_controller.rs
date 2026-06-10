@@ -12,6 +12,7 @@
 //! | DELETE| /api/users/{id}| delete() |
 
 use axum::extract::Path;
+use common::error::AppError;
 use common::resources::JsonResource;
 use common::utils::pagination::PageParams;
 use common::utils::response::ApiResponse;
@@ -71,64 +72,61 @@ impl UserController {
     /// `GET /api/users?page=1&page_size=20`
     pub async fn index(
         ValidatedQuery(params): ValidatedQuery<PageParams>,
-    ) -> ApiResponse<serde_json::Value> {
+    ) -> Result<ApiResponse<serde_json::Value>, AppError> {
         let service = UserService::new();
-        match service.list(&params).await {
-            Ok(paginated) => {
-                // 用 Resource 转换每条记录
-                let items: Vec<serde_json::Value> = paginated
-                    .items
-                    .into_iter()
-                    .map(|m| UserResource::from_source(m).to_array())
-                    .collect();
-                ApiResponse::success(json!({
-                    "items": items,
-                    "total": paginated.total,
-                    "page": paginated.page,
-                    "page_size": paginated.page_size,
-                    "total_pages": paginated.total_pages,
-                }))
-            }
-            Err(e) => ApiResponse::error(500, &e.to_string()),
-        }
+        let paginated = service.list(&params).await?;
+
+        // 用 Resource 转换每条记录
+        let items: Vec<serde_json::Value> = paginated
+            .items
+            .into_iter()
+            .map(|m| UserResource::from_source(m).to_array())
+            .collect();
+
+        Ok(ApiResponse::success(json!({
+            "items": items,
+            "total": paginated.total,
+            "page": paginated.page,
+            "page_size": paginated.page_size,
+            "total_pages": paginated.total_pages,
+        })))
     }
 
     /// 用户详情
     ///
     /// `GET /api/users/{id}`
-    pub async fn show(Path(id): Path<i32>) -> ApiResponse<serde_json::Value> {
+    pub async fn show(Path(id): Path<i32>) -> Result<ApiResponse<serde_json::Value>, AppError> {
         let service = UserService::new();
-        match service.show(id).await {
-            Ok(Some(user)) => UserResource::make(user).respond(),
-            Ok(None) => ApiResponse::error(404, "用户不存在"),
-            Err(e) => ApiResponse::error(500, &e.to_string()),
-        }
+        let user = service
+            .show(id)
+            .await?
+            .ok_or_else(|| AppError::not_found("用户不存在"))?;
+
+        Ok(UserResource::make(user).respond())
     }
 
     /// 创建用户（示例，需要 FormRequest 配合）
     ///
     /// `POST /api/users`
-    pub async fn create() -> ApiResponse<serde_json::Value> {
+    pub async fn create() -> Result<ApiResponse<serde_json::Value>, AppError> {
         // TODO: 与 FormRequest 集成后实现
-        ApiResponse::success(json!({ "message": "创建接口待实现" }))
+        Ok(ApiResponse::success(json!({ "message": "创建接口待实现" })))
     }
 
     /// 更新用户
     ///
     /// `PUT /api/users/{id}`
-    pub async fn update(Path(id): Path<i32>) -> ApiResponse<serde_json::Value> {
+    pub async fn update(Path(id): Path<i32>) -> Result<ApiResponse<serde_json::Value>, AppError> {
         // TODO: 与 FormRequest 集成后实现
-        ApiResponse::success(json!({ "message": format!("更新接口待实现, id={}", id) }))
+        Ok(ApiResponse::success(json!({ "message": format!("更新接口待实现, id={}", id) })))
     }
 
     /// 删除用户
     ///
     /// `DELETE /api/users/{id}`
-    pub async fn delete(Path(id): Path<i32>) -> ApiResponse<serde_json::Value> {
+    pub async fn delete(Path(id): Path<i32>) -> Result<ApiResponse<serde_json::Value>, AppError> {
         let service = UserService::new();
-        match service.destroy(id).await {
-            Ok(()) => ApiResponse::success(json!({ "deleted": true })),
-            Err(e) => ApiResponse::error(500, &e.to_string()),
-        }
+        service.destroy(id).await?;
+        Ok(ApiResponse::success(json!({ "deleted": true })))
     }
 }

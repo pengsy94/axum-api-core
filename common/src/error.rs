@@ -1,4 +1,3 @@
-use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use crate::utils::response::ApiResponse;
 
@@ -35,22 +34,19 @@ pub enum AppError {
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
-        let (status, code) = match &self {
-            AppError::Unauthorized(_) => (StatusCode::UNAUTHORIZED, 401),
-            AppError::Forbidden(_) => (StatusCode::FORBIDDEN, 403),
-            AppError::NotFound(_) => (StatusCode::NOT_FOUND, 404),
-            AppError::BadRequest(_) => (StatusCode::BAD_REQUEST, 400),
-            AppError::Conflict(_) => (StatusCode::CONFLICT, 409),
-            AppError::Internal(_) => (StatusCode::INTERNAL_SERVER_ERROR, 500),
+        let code = match &self {
+            AppError::Unauthorized(_) => 401,
+            AppError::Forbidden(_) => 403,
+            AppError::NotFound(_) => 404,
+            AppError::BadRequest(_) => 400,
+            AppError::Conflict(_) => 409,
+            AppError::Internal(_) => 500,
         };
 
         let message = self.to_string();
         tracing::error!(%code, %message, "请求处理失败");
 
-        // 先构建 ApiResponse JSON body，再覆写 HTTP 状态码
-        let mut resp = ApiResponse::<()>::error(code, &message).into_response();
-        *resp.status_mut() = status;
-        resp
+        ApiResponse::<()>::error(code, &message).into_response()
     }
 }
 

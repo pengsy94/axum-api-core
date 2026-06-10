@@ -1,3 +1,4 @@
+use kernel::config::AppConfig;
 use kernel::config::server_config;
 #[cfg(target_os = "windows")]
 use time::format_description::well_known::Rfc3339;
@@ -15,6 +16,10 @@ pub struct Logger {
 
 impl Logger {
     pub fn init() -> anyhow::Result<Self> {
+        if AppConfig::try_global().is_none() {
+            AppConfig::init()?;
+        }
+
         let config = server_config();
 
         let format = get_log_format();

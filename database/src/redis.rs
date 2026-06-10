@@ -11,7 +11,7 @@ impl RedisManager {
     pub async fn init() -> Result<(), String> {
         let config = redis_config();
         if !config.enabled {
-            tracing::info!("未配置 REDIS_URL，跳过 Redis 初始化");
+            println!("✺ 未配置 REDIS_URL，跳过 Redis 初始化");
             return Ok(());
         }
         let client =
@@ -20,7 +20,7 @@ impl RedisManager {
             .await
             .map_err(|e| format!("Redis 连接失败: {}", e))?;
         *REDIS_POOL.lock().unwrap() = Some(Arc::new(conn));
-        tracing::info!("Redis 连接已建立");
+        println!("✅ Redis 连接已建立");
         Ok(())
     }
 
@@ -28,11 +28,25 @@ impl RedisManager {
         REDIS_POOL.lock().unwrap().clone()
     }
 
+    /// 检查 Redis 连接是否存活
+    pub async fn ping() -> bool {
+        match Self::get() {
+            Some(conn) => {
+                let mut conn = conn.as_ref().clone();
+                redis::cmd("PING")
+                    .query_async::<String>(&mut conn)
+                    .await
+                    .is_ok()
+            }
+            None => false,
+        }
+    }
+
     pub fn close() {
         let mut guard = REDIS_POOL.lock().unwrap();
         if guard.is_some() {
             guard.take();
-            println!("✅ Redis 连接已关闭");
+            println!("📌 Redis 连接已关闭");
         }
     }
 }
