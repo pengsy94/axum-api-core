@@ -66,9 +66,20 @@ pub async fn logging_middleware(
     let method = request.method().clone();
     let headers = request.headers().clone();
     let start = Instant::now();
+    let trace_id = request
+        .extensions()
+        .get::<TraceId>()
+        .map(|t| t.0.clone())
+        .unwrap_or_else(|| "-".to_string());
 
     info!(
-        "→ {} {} {}",
+        "\n┌─ HTTP REQUEST ─────────────────────────────────────────\n\
+         │ trace_id: {}\n\
+         │ method  : {}\n\
+         │ uri     : {}\n\
+         │ headers : {}\n\
+         └────────────────────────────────────────────────────────",
+        trace_id,
         method,
         original_uri,
         fmt_hdrs(&headers, REQ_HDRS)
@@ -77,6 +88,7 @@ pub async fn logging_middleware(
     let response = next.run(request).await;
     let duration = start.elapsed();
     let status = response.status();
+    let status_text = status.canonical_reason().unwrap_or("");
 
     let log_body = response
         .extensions()
@@ -85,9 +97,15 @@ pub async fn logging_middleware(
         .unwrap_or_else(|| "<streaming-or-non-json-body>".to_string());
 
     info!(
-        "← {} {} ({})  |  body: {}",
+        "\n┌─ HTTP RESPONSE ────────────────────────────────────────\n\
+         │ trace_id: {}\n\
+         │ status  : {} {}\n\
+         │ cost    : {}\n\
+         │ body    : {}\n\
+         └────────────────────────────────────────────────────────",
+        trace_id,
         status.as_u16(),
-        status.canonical_reason().unwrap_or(""),
+        status_text,
         fmt_dur(duration),
         log_body
     );

@@ -121,6 +121,15 @@ curl http://127.0.0.1:3000/ready
 - 当 `SERVER_CRON=true` 时，服务会尝试启动调度器
 - 如果调度器启动失败，当前实现会记录告警，但服务本身继续运行
 
+### 5.4 请求日志格式
+
+`logging_middleware` 会把请求和响应拆成两个块状段落输出：
+
+- `HTTP REQUEST`：包含 `trace_id`、`method`、`uri`、核心 headers
+- `HTTP RESPONSE`：包含 `trace_id`、`status`、耗时、body 摘要
+
+这套格式在终端和日志文件中保持一致，方便肉眼快速定位一次请求的完整链路。
+
 ---
 
 ## 6. 响应结构与状态语义
@@ -191,6 +200,9 @@ HTTP 状态在这个项目中的角色更偏向于：
 | `/api/users/{id}` | GET | 用户详情 |
 | `/api/users/{id}` | PUT | 更新用户占位接口 |
 | `/api/users/{id}` | DELETE | 删除用户 |
+| `/api/openapi.json` | GET | OpenAPI JSON 规范，需启用 `app/openapi` |
+| `/docs` | GET | RapiDoc 可视化文档，需启用 `app/openapi` |
+| `/swagger` | GET | Swagger UI，需启用 `app/openapi` |
 | `/test/*` | 多种 | 调试测试路由，需 `DEBUG=true` |
 | `/ws` | WS | WebSocket，需 `SERVER_WS_OPEN=true` |
 
@@ -351,22 +363,26 @@ artisan/      代码脚手架
 
 ---
 
-## 13. 已知事项
+## 13. 补充说明
 
-### 13.1 OpenAPI 目前存在编译问题
+### 13.1 OpenAPI / 可视化 API 文档
 
-当前代码库里，启用 OpenAPI feature 的编译命令：
+当前代码库里，启用 OpenAPI feature 的命令：
 
 ```bash
-cargo check -p bin --features app/openapi
+cargo run -p bin --features app/openapi
 ```
 
-我已验证这条链路当前会在 `app/src/docs.rs` 一侧报错，因此此功能暂时不建议作为可用能力写入交付流程。
+启用后可访问：
 
-如果后续修复了 OpenAPI feature，再恢复：
+- `/api/openapi.json`：OpenAPI 原始规范
+- `/docs`：默认的 RapiDoc 可视化文档页
+- `/swagger`：备用 Swagger UI 页面
 
-- `/api/openapi.json`
-- `/docs`
+说明：
+
+- `RapiDoc` 更现代，也更适合阅读和对外展示
+- `Swagger UI` 更适合调试和直接试请求
 
 ### 13.2 认证中间件已提供，但默认未全局挂载
 

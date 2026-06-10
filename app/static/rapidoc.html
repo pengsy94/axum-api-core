@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Axum Api Core - API Docs</title>
+    <style>
+        :root {
+            --bg: #f4efe6;
+            --panel: rgba(255, 252, 247, 0.84);
+            --line: rgba(35, 30, 22, 0.12);
+            --text: #231e16;
+            --muted: #6c6254;
+            --accent: #c65d2e;
+            --accent-soft: #f4c7a8;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(198, 93, 46, 0.14), transparent 30%),
+                radial-gradient(circle at top right, rgba(39, 111, 91, 0.12), transparent 28%),
+                linear-gradient(180deg, #f9f4ec 0%, var(--bg) 100%);
+            font-family: "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+        }
+
+        .shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-rows: auto 1fr;
+        }
+
+        .hero {
+            padding: 28px 32px 20px;
+            border-bottom: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.28));
+            backdrop-filter: blur(12px);
+        }
+
+        .hero-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            gap: 24px;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: #66311a;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 14px 0 8px;
+            font-size: clamp(32px, 5vw, 56px);
+            line-height: 0.95;
+            letter-spacing: -0.04em;
+        }
+
+        p {
+            margin: 0;
+            max-width: 780px;
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .links {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0 16px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: var(--panel);
+            color: var(--text);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+        }
+
+        .link:hover {
+            transform: translateY(-1px);
+            border-color: rgba(198, 93, 46, 0.35);
+            background: rgba(255, 255, 255, 0.96);
+        }
+
+        .doc-wrap {
+            padding: 20px 22px 28px;
+        }
+
+        .content {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: grid;
+            gap: 18px;
+        }
+
+        .portal-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 18px;
+        }
+
+        .stack {
+            display: grid;
+            gap: 18px;
+        }
+
+        .panel {
+            padding: 22px;
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            background: var(--panel);
+            box-shadow: 0 16px 48px rgba(35, 30, 22, 0.06);
+        }
+
+        .panel h2,
+        .panel h3 {
+            margin: 0 0 10px;
+            letter-spacing: -0.03em;
+        }
+
+        .panel h2 {
+            font-size: 28px;
+        }
+
+        .panel h3 {
+            font-size: 20px;
+        }
+
+        .panel p + p {
+            margin-top: 10px;
+        }
+
+        .facts {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .fact {
+            padding: 14px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.74);
+            border: 1px solid rgba(35, 30, 22, 0.08);
+        }
+
+        .fact-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .fact-value {
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.35;
+        }
+
+        .badge-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 34px;
+            padding: 0 12px;
+            border-radius: 999px;
+            background: rgba(198, 93, 46, 0.1);
+            color: #7a3c1f;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .cards {
+            display: grid;
+            gap: 12px;
+        }
+
+        .mini-card {
+            padding: 16px 16px 14px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(35, 30, 22, 0.08);
+        }
+
+        .mini-card strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+
+        .list {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .code-block {
+            margin-top: 14px;
+            padding: 16px;
+            border-radius: 18px;
+            background: #231e16;
+            color: #f8f3eb;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 13px;
+            line-height: 1.65;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .endpoint-grid {
+            display: grid;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .endpoint {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 12px;
+            align-items: start;
+            padding: 14px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(35, 30, 22, 0.08);
+        }
+
+        .method {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 68px;
+            min-height: 32px;
+            padding: 0 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #fff;
+        }
+
+        .method.post {
+            background: #b65a2a;
+        }
+
+        .method.get {
+            background: #2f7f69;
+        }
+
+        .path {
+            display: block;
+            margin-bottom: 6px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .response-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+        }
+
+        .response-table th,
+        .response-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid rgba(35, 30, 22, 0.08);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .response-table th {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+        }
+
+        .doc-card {
+            max-width: 1280px;
+            margin: 0 auto;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 16px 48px rgba(35, 30, 22, 0.08);
+        }
+
+        rapi-doc {
+            width: 100%;
+            height: calc(100vh - 220px);
+            --bg: transparent;
+            --fg: #231e16;
+            --light-fg: #6c6254;
+            --light-bg: #f8f3eb;
+            --header-bg: #f8f3eb;
+            --header-fg: #231e16;
+            --primary-color: #c65d2e;
+            --font-size-small: 13px;
+            --font-size-regular: 15px;
+            --font-size-mono: 13px;
+            --nav-hover-bg-color: rgba(198, 93, 46, 0.08);
+            --nav-accent-color: #c65d2e;
+        }
+
+        @media (max-width: 720px) {
+            .hero {
+                padding: 22px 18px 18px;
+            }
+
+            .doc-wrap {
+                padding: 14px 12px 18px;
+            }
+
+            .panel {
+                padding: 18px;
+                border-radius: 20px;
+            }
+
+            .doc-card {
+                border-radius: 18px;
+            }
+
+            .facts {
+                grid-template-columns: 1fr;
+            }
+
+            rapi-doc {
+                height: calc(100vh - 320px);
+            }
+        }
+
+        @media (max-width: 980px) {
+            .portal-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .facts {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+    <script type="module" src="https://unpkg.com/rapidoc/dist/rapidoc-min.js"></script>
+</head>
+<body>
+    <div class="shell">
+        <section class="hero">
+            <div class="hero-inner">
+                <div>
+                    <span class="eyebrow">API Reference</span>
+                    <h1>Axum API Core</h1>
+                    <p>
+                        面向中文开发者的 API 门户页。
+                        顶部先解决「怎么接、怎么鉴权、怎么判断结果」，下面再进入完整接口文档。
+                    </p>
+                </div>
+                <div class="links">
+                    <a class="link" href="#quickstart">快速开始</a>
+                    <a class="link" href="/api/openapi.json" target="_blank" rel="noreferrer">OpenAPI JSON</a>
+                    <a class="link" href="/swagger" target="_blank" rel="noreferrer">Swagger UI</a>
+                </div>
+            </div>
+        </section>
+
+        <main class="doc-wrap">
+            <div class="content">
+                <section class="portal-grid">
+                    <article class="panel">
+                        <h2>先看这 4 件事</h2>
+                        <p>
+                            这个项目默认把 HTTP 当成“通信是否连通”的语义层，
+                            业务是否成功请优先看响应体里的 <code>code</code> 字段。
+                        </p>
+                        <div class="facts">
+                            <div class="fact">
+                                <span class="fact-label">Base URL</span>
+                                <span class="fact-value" id="base-url">当前域名</span>
+                            </div>
+                            <div class="fact">
+                                <span class="fact-label">鉴权方式</span>
+                                <span class="fact-value">Bearer Token</span>
+                            </div>
+                            <div class="fact">
+                                <span class="fact-label">结果判断</span>
+                                <span class="fact-value">优先看 body.code</span>
+                            </div>
+                        </div>
+                        <div class="badge-row">
+                            <span class="badge">业务成功：code=200</span>
+                            <span class="badge">登录失败：HTTP 200 + code=401</span>
+                            <span class="badge">就绪失败：/ready 可能返回 503</span>
+                        </div>
+                    </article>
+
+                    <aside class="stack">
+                        <section class="panel">
+                            <h3>常用入口</h3>
+                            <div class="cards">
+                                <div class="mini-card">
+                                    <strong>OpenAPI 原始规范</strong>
+                                    <a href="/api/openapi.json" target="_blank" rel="noreferrer">/api/openapi.json</a>
+                                </div>
+                                <div class="mini-card">
+                                    <strong>可交互调试页</strong>
+                                    <a href="/swagger" target="_blank" rel="noreferrer">/swagger</a>
+                                </div>
+                                <div class="mini-card">
+                                    <strong>运行状态</strong>
+                                    <a href="/health" target="_blank" rel="noreferrer">/health</a>
+                                    &nbsp;·&nbsp;
+                                    <a href="/ready" target="_blank" rel="noreferrer">/ready</a>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="panel">
+                            <h3>鉴权说明</h3>
+                            <ul class="list">
+                                <li>先调用 <code>POST /api/login</code> 获取 token</li>
+                                <li>请求头使用 <code>Authorization: Bearer &lt;token&gt;</code></li>
+                                <li>当前仓库中，认证中间件已提供，但并未默认挂到全部路由</li>
+                            </ul>
+                        </section>
+                    </aside>
+                </section>
+
+                <section class="portal-grid" id="quickstart">
+                    <article class="panel">
+                        <h2>快速开始</h2>
+                        <p>最常见的接入路径就是：登录拿 token，然后访问业务接口。</p>
+                        <div class="endpoint-grid">
+                            <div class="endpoint">
+                                <span class="method post">POST</span>
+                                <div>
+                                    <span class="path">/api/login</span>
+                                    <span>演示登录，默认账号为 <code>admin@example.com / admin123</code></span>
+                                </div>
+                            </div>
+                            <div class="endpoint">
+                                <span class="method get">GET</span>
+                                <div>
+                                    <span class="path">/api/users?page=1&page_size=20</span>
+                                    <span>用户列表接口，适合作为联调验证入口</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="code-block" id="login-curl"></div>
+                        <div class="code-block" id="users-curl"></div>
+                    </article>
+
+                    <aside class="stack">
+                        <section class="panel">
+                            <h3>响应结构</h3>
+                            <div class="code-block">{
+  "code": 200,
+  "data": {},
+  "message": "success",
+  "errors": null
+}</div>
+                        </section>
+
+                        <section class="panel">
+                            <h3>结果语义</h3>
+                            <table class="response-table">
+                                <thead>
+                                    <tr>
+                                        <th>场景</th>
+                                        <th>如何判断</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>业务成功</td>
+                                        <td><code>code = 200</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td>业务失败</td>
+                                        <td><code>code = 400/401/403/404/409/500</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td>参数校验失败</td>
+                                        <td>看 <code>errors</code> 字段</td>
+                                    </tr>
+                                    <tr>
+                                        <td>服务是否能接请求</td>
+                                        <td>看 HTTP 状态 / <code>/health</code> / <code>/ready</code></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </section>
+                    </aside>
+                </section>
+
+                <section class="doc-card">
+                <rapi-doc
+                    id="rapidoc"
+                    spec-url="/api/openapi.json"
+                    theme="light"
+                    render-style="focused"
+                    show-header="false"
+                    allow-authentication="true"
+                    allow-server-selection="false"
+                    allow-try="true"
+                    sort-tags="true"
+                    sort-endpoints-by="method"
+                    regular-font='Georgia, "Times New Roman", serif'
+                    mono-font='"SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace'
+                    nav-bg-color="#f8f3eb"
+                    show-method-in-nav-bar="as-colored-text"
+                    use-path-in-nav-bar="true"
+                    schema-style="tree"
+                    default-schema-tab="schema">
+                </rapi-doc>
+                </section>
+            </div>
+        </main>
+    </div>
+    <script>
+        const baseUrl = window.location.origin;
+        document.getElementById("base-url").textContent = baseUrl;
+
+        document.getElementById("login-curl").textContent =
+`# 1. 登录拿 token
+curl -X POST ${baseUrl}/api/login \\
+  -H 'Content-Type: application/json' \\
+  -d '{
+    "email": "admin@example.com",
+    "password": "admin123"
+  }'`;
+
+        document.getElementById("users-curl").textContent =
+`# 2. 访问业务接口（如果后续启用了鉴权，可加 Authorization 头）
+curl '${baseUrl}/api/users?page=1&page_size=20'`;
+
+        document.getElementById("rapidoc").setAttribute("server-url", baseUrl);
+    </script>
+</body>
+</html>

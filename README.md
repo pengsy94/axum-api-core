@@ -26,6 +26,7 @@ cargo run -p bin
 - 启动与配置
 - 响应结构与 `body.code` 语义
 - `/health` 与 `/ready` 的区别
+- OpenAPI 与可视化 API 文档入口
 - 数据库迁移与 Redis 使用
 - `Artisan CLI` 脚手架命令
 - 项目分层与开发流程

@@ -12,18 +12,6 @@ const DEMO_PASSWORD: &str = "admin123";
 /// 用户登录
 ///
 /// 使用邮箱和密码登录，返回 JWT token。
-#[cfg_attr(
-    feature = "openapi",
-    utoipa::path(
-        post,
-        path = "/api/login",
-        request_body = LoginRequest,
-        responses(
-            (status = 200, description = "登录成功", body = ApiResponse<LoginResponse>),
-            (status = 400, description = "参数校验失败", body = common::utils::response::ErrorResponse),
-        ),
-    )
-)]
 /// 密码验证（使用懒初始化缓存哈希）
 fn check_password(input: &str) -> bool {
     use std::sync::OnceLock;
@@ -37,6 +25,18 @@ fn check_password(input: &str) -> bool {
     verify_password(input, hash).unwrap_or(false)
 }
 
+#[cfg_attr(
+    feature = "openapi",
+    utoipa::path(
+        post,
+        path = "/api/login",
+        request_body = LoginRequest,
+        responses(
+            (status = 200, description = "登录成功", body = ApiResponse<LoginResponse>),
+            (status = 400, description = "参数校验失败", body = common::utils::response::ErrorResponse),
+        ),
+    )
+)]
 pub async fn login(
     ValidatedJson(payload): ValidatedJson<LoginRequest>,
 ) -> ApiResponse<LoginResponse> {

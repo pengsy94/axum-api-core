@@ -34,7 +34,7 @@ pub fn build_router() -> Router {
         router = router.nest("/test", api::case::set_test_api());
     }
 
-    // OpenAPI JSON 规范 + Swagger UI（编译时启用：cargo run --features openapi）
+    // OpenAPI JSON 规范 + 可视化页面（编译时启用：cargo run -p bin --features app/openapi）
     #[cfg(feature = "openapi")]
     {
         use crate::docs::ApiDoc;
@@ -44,8 +44,11 @@ pub fn build_router() -> Router {
             axum::Json(ApiDoc::openapi())
         }));
 
-        // Swagger UI（通过 CDN 加载）
-        router = router.route("/docs", get(swagger_ui));
+        // RapiDoc（默认文档页）
+        router = router.route("/docs", get(rapidoc_ui));
+
+        // Swagger UI（备用调试页）
+        router = router.route("/swagger", get(swagger_ui));
     }
 
     // 健康检查
@@ -115,4 +118,10 @@ async fn handle_404() -> (StatusCode, &'static str) {
 #[cfg(feature = "openapi")]
 async fn swagger_ui() -> axum::response::Html<&'static str> {
     axum::response::Html(include_str!("../static/swagger.html"))
+}
+
+/// RapiDoc 页面（通过 CDN 加载，无需额外依赖）
+#[cfg(feature = "openapi")]
+async fn rapidoc_ui() -> axum::response::Html<&'static str> {
+    axum::response::Html(include_str!("../static/rapidoc.html"))
 }
