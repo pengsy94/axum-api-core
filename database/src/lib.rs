@@ -37,7 +37,7 @@ impl DatabaseManager {
 
         let connection = Database::connect(opt).await?;
         *DB_POOL.lock().unwrap() = Some(Arc::new(connection));
-        println!("✅ Database connection pool initialized successfully!");
+        println!("✅ the Database connection pool has been initialized successfully!");
         Ok(())
     }
 

@@ -35,13 +35,17 @@ pub async fn make() -> anyhow::Result<(Router, TcpListener, SchedulerManager)> {
 
     // 构建应用
     let (make_service, listener) = build_application().await?;
-    // 初始化数据库信息
-    if let Err(e) = DatabaseManager::init().await {
-        tracing::warn!("数据库初始化失败（服务仍可运行）: {}", e);
+    // 初始化数据库信息（带 10 秒超时）
+    match tokio::time::timeout(Duration::from_secs(10), DatabaseManager::init()).await {
+        Ok(Ok(())) => {}
+        Ok(Err(e)) => println!("⚠️ 数据库初始化失败（服务仍可运行）: {}", e),
+        Err(_) => println!("⚠️ 数据库连接超时（10s），跳过初始化（服务仍可运行）"),
     }
-    // 初始化 Redis
-    if let Err(e) = RedisManager::init().await {
-        tracing::warn!("Redis 初始化失败（服务仍可运行）: {}", e);
+    // 初始化 Redis（带 10 秒超时）
+    match tokio::time::timeout(Duration::from_secs(10), RedisManager::init()).await {
+        Ok(Ok(())) => {}
+        Ok(Err(e)) => println!("⚠️ Redis 初始化失败（服务仍可运行）: {}", e),
+        Err(_) => println!("⚠️ Redis 连接超时（10s），跳过初始化（服务仍可运行）"),
     }
     // 初始化 Prometheus 指标收集
     let handle = metrics_exporter_prometheus::PrometheusBuilder::new()
@@ -57,7 +61,7 @@ pub async fn make() -> anyhow::Result<(Router, TcpListener, SchedulerManager)> {
     }
 
     println!();
-    println!("{:>2} Axum 服务启动成功!!!", "🎉🎉🎉");
+    println!("{:>2} Axum service has started successfully!!!", "🎉🎉🎉");
     println!();
 
     Ok((make_service, listener, scheduler_manager))

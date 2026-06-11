@@ -20,7 +20,7 @@ impl RedisManager {
             .await
             .map_err(|e| format!("Redis 连接失败: {}", e))?;
         *REDIS_POOL.lock().unwrap() = Some(Arc::new(conn));
-        println!("✅ Redis connection pool initialized successfully!");
+        println!("✅ the Redis connection pool has been initialized successfully!");
         Ok(())
     }
 

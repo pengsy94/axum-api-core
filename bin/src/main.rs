@@ -17,7 +17,7 @@ async fn main() -> anyhow::Result<()> {
             }
         }
         _ = tokio::signal::ctrl_c() => {
-            println!("\n🕞 接收到 Ctrl+C 信号，正在优雅关闭...\n");
+            println!("\n🕞 Received Ctrl+C signal. Shutting down gracefully...\n");
 
             // 关闭调度器
             let shutdown_future = scheduler_manager.shutdown_future();
@@ -33,7 +33,7 @@ async fn main() -> anyhow::Result<()> {
 
     println!();
     println!(
-        "🔴 Axum 服务已优雅关闭 [{}]\n",
+        "🔴 Axum service has been shut down. [{}]\n",
         chrono::Local::now().format("%Y-%m-%d %H:%M:%S")
     );
 
