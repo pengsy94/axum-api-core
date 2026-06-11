@@ -11,7 +11,7 @@ impl RedisManager {
     pub async fn init() -> Result<(), String> {
         let config = redis_config();
         if !config.enabled {
-            println!("✺ the REDIS_URL is not configured; Redis initialization is skipped.");
+            println!("✺ the REDIS_URL is not configured; skipping Redis initialization.");
             return Ok(());
         }
         let client =
