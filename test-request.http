@@ -47,3 +47,13 @@ content-type: application/json;charset=UTF-8
   "email": "11@qq.com",
   "password": "1111111"
 }
+
+### POST 请求为json的时候,新增数据
+# @no-log
+# @no-redirect
+POST http://127.0.0.1:5000/api/users
+content-type: application/json;charset=UTF-8
+
+{
+  "name": "Jackson"
+}
