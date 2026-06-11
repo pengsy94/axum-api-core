@@ -1,4 +1,5 @@
 use axum::{
+    body::Body,
     extract::{OriginalUri, Request},
     http::{HeaderMap, StatusCode},
     middleware::Next,
@@ -60,17 +61,20 @@ fn fmt_dur(d: Duration) -> String {
 
 pub async fn logging_middleware(
     OriginalUri(original_uri): OriginalUri,
-    request: Request,
+    mut request: Request,
     next: Next,
 ) -> Response {
     let method = request.method().clone();
     let headers = request.headers().clone();
     let start = Instant::now();
-    let trace_id = request
-        .extensions()
-        .get::<TraceId>()
-        .map(|t| t.0.clone())
-        .unwrap_or_else(|| "-".to_string());
+    // 确保 TraceId 存在：请求未携带则自动生成
+    let trace_id = if let Some(t) = request.extensions().get::<TraceId>() {
+        t.0.clone()
+    } else {
+        let id = Uuid::new_v4().to_string();
+        request.extensions_mut().insert(TraceId(id.clone()));
+        id
+    };
 
     info!(
         "\n┌─ HTTP REQUEST ─────────────────────────────────────────\n\
@@ -85,10 +89,29 @@ pub async fn logging_middleware(
         fmt_hdrs(&headers, REQ_HDRS)
     );
 
-    let response = next.run(request).await;
+    let mut response = next.run(request).await;
     let duration = start.elapsed();
     let status = response.status();
     let status_text = status.canonical_reason().unwrap_or("");
+
+    // 确保响应头中有 x-trace-id
+    response.headers_mut().insert(
+        http::HeaderName::from_static("x-trace-id"),
+        http::HeaderValue::from_str(&trace_id).unwrap(),
+    );
+
+    // 注入 trace_id 到 JSON 响应体
+    if let Some(res_json) = response.extensions().get::<ResJsonString>() {
+        let body_clone = res_json.0.clone();
+        if let Ok(mut json_val) = serde_json::from_str::<serde_json::Value>(&body_clone) {
+            if let serde_json::Value::Object(ref mut map) = json_val {
+                map.insert("trace_id".to_string(), serde_json::Value::String(trace_id.clone()));
+            }
+            let new_body = serde_json::to_string(&json_val).unwrap_or(body_clone);
+            *response.body_mut() = Body::from(new_body.clone());
+            response.extensions_mut().insert(ResJsonString(new_body));
+        }
+    }
 
     let log_body = response
         .extensions()
