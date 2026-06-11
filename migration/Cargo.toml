@@ -8,6 +8,7 @@ version.workspace = true
 sea-orm-migration = { workspace = true }
 sea-orm = { workspace = true, features = ["sqlx-mysql", "macros", "runtime-tokio-native-tls", "with-chrono"] }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+dotenvy = { workspace = true }
 
 [features]
 default = ["mysql"]

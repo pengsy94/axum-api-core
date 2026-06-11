@@ -6,6 +6,8 @@ const DB_URL: &str = "DATABASE_URL";
 
 #[tokio::main]
 async fn main() {
+    dotenvy::dotenv().ok();
+
     let database_url = std::env::var(DB_URL).unwrap_or_else(|_| {
         eprintln!("请设置 {} 环境变量", DB_URL);
         std::process::exit(1);
