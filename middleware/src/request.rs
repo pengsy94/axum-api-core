@@ -14,20 +14,18 @@ use tokio::time::sleep;
 use tracing::info;
 use uuid::Uuid;
 
-/// 响应体日志最大字节数（超出截断）
-const MAX_BODY_LOG_BYTES: usize = 4096;
-
 /// 请求日志展示的 header
-const REQ_HDRS: &[&str] = &["content-type", "authorization", "user-agent"];
+const REQ_HDRS: &[&str] = &["content-type", "authorization", "user-agent", "host", "accept"];
 
 /// 敏感头
 const SENSITIVE: &[&str] = &["authorization", "cookie", "set-cookie"];
 
 /// 格式化核心 headers 为紧凑字符串（name: value, ...）
+/// 若 keys 为空，展示所有非敏感头
 fn fmt_hdrs(hdrs: &HeaderMap, keys: &[&str]) -> String {
     let parts: Vec<String> = hdrs
         .iter()
-        .filter(|(name, _)| keys.contains(&name.as_str().to_lowercase().as_str()))
+        .filter(|(name, _)| keys.is_empty() || keys.contains(&name.as_str().to_lowercase().as_str()))
         .map(|(name, value)| {
             let n = name.as_str().to_lowercase();
             let v = value.to_str().unwrap_or("-");
@@ -46,7 +44,7 @@ fn fmt_hdrs(hdrs: &HeaderMap, keys: &[&str]) -> String {
     if parts.is_empty() {
         String::new()
     } else {
-        format!("  |  {}", parts.join("  |  "))
+        format!("{}", parts.join("  |  "))
     }
 }
 
@@ -77,12 +75,12 @@ pub async fn logging_middleware(
     };
 
     info!(
-        "\n┌─ HTTP REQUEST ─────────────────────────────────────────\n\
-         │ trace_id: {}\n\
-         │ method  : {}\n\
-         │ uri     : {}\n\
-         │ headers : {}\n\
-         └────────────────────────────────────────────────────────",
+        "\n────────── HTTP REQUEST ────────────────────────────────\n\
+          trace_id: {}\n\
+          method  : {}\n\
+          uri     : {}\n\
+          headers : {}\n\
+         ────────────────────────────────────────────────────────",
         trace_id,
         method,
         original_uri,
@@ -116,16 +114,16 @@ pub async fn logging_middleware(
     let log_body = response
         .extensions()
         .get::<ResJsonString>()
-        .map(|body| truncate_log_body(&body.0))
+        .map(|body| body.0.clone())
         .unwrap_or_else(|| "<streaming-or-non-json-body>".to_string());
 
     info!(
-        "\n┌─ HTTP RESPONSE ────────────────────────────────────────\n\
-         │ trace_id: {}\n\
-         │ status  : {} {}\n\
-         │ cost    : {}\n\
-         │ body    : {}\n\
-         └────────────────────────────────────────────────────────",
+        "\n────────── HTTP RESPONSE ───────────────────────────────\n\
+          trace_id: {}\n\
+          status  : {} {}\n\
+          cost    : {}\n\
+          body    : {}\n\
+         ────────────────────────────────────────────────────────",
         trace_id,
         status.as_u16(),
         status_text,
@@ -195,11 +193,4 @@ pub async fn trace_middleware(mut request: Request, next: Next) -> Response {
     response
 }
 
-fn truncate_log_body(body: &str) -> String {
-    if body.len() > MAX_BODY_LOG_BYTES {
-        let truncated: String = body.chars().take(MAX_BODY_LOG_BYTES).collect();
-        format!("{}... ({} bytes, truncated)", truncated, body.len())
-    } else {
-        body.to_string()
-    }
-}
+
